@@ -184,3 +184,30 @@ Paar1/Paar2/BP/RNBP over hundreds of restarts was *never* optimal — the solver
 improved on it every time it answered at all. That is a sharper version of the
 optimality-gap result: at n≤8 the heuristics are optimal ~69% of the time, but by
 n=9–10 they are leaving gates on the table consistently.
+
+## 7. MDS matrices are out of reach for exact methods
+
+The smallest interesting MDS instances were attempted directly. A k×k MDS matrix
+over GF(2⁴) expands to a 4k×4k binary matrix, so k=2 gives n=8 and k=3 gives n=12.
+(A 4×4 MDS over GF(4) would also give n=8, but none exists — it would need an MDS
+code of length 8 over GF(4), beyond the q+1 = 5 limit.)
+
+| matrix | n | naive | heuristic | **proven optimal** |
+|---|---:|---:|---:|---:|
+| 2×2 circulant(1,2) over GF(2⁴) | 8 | 10 | 10 | **10** (k=9 UNSAT) |
+| 2×2 Hadamard(1,2) over GF(2⁴) | 8 | 10 | 10 | **10** (k=9 UNSAT) |
+
+These are, as far as the literature check could determine, the first
+proven-optimal XOR counts for MDS matrices — but they are trivial: naive equals
+optimal, so no sharing is possible at all, and the result carries no information
+about larger matrices.
+
+The 3×3 case (n=12) did not settle within a 40M-conflict budget, consistent with
+the random-instance frontier where n=11 also failed. **Exact optimality for any
+cryptographically interesting MDS matrix is far out of reach**: the smallest one
+in real use is 4×4 over GF(2⁴), i.e. n=16 with an optimum near 40 gates, several
+orders of magnitude beyond where the encoding stalls.
+
+This is worth stating plainly because it bounds the whole approach. The gap
+between what SAT can close (n≈10) and what the field cares about (n=32, 64) is
+not going to be crossed by better solvers or better encodings of this kind.

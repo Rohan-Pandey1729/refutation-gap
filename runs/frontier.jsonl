@@ -3,3 +3,4 @@
 {"instance": "rand_n10_m10_d0.4_s0", "n": 10, "density": 0.4, "seed": 0, "heuristic_ub": 19, "trivial_lb": 9, "k": 18, "result": "TIMEOUT", "seconds": 1863.195261478424, "vars": 4528, "clauses": 152377, "conf_budget": 8000000}
 {"instance": "rand_n10_m10_d0.4_s1", "n": 10, "density": 0.4, "seed": 1, "heuristic_ub": 20, "trivial_lb": 10, "k": 19, "result": "SAT", "seconds": 314.28296160697937, "vars": 4912, "clauses": 170191, "conf_budget": 8000000}
 {"instance": "rand_n11_m11_d0.4_s0", "n": 11, "density": 0.4, "seed": 0, "heuristic_ub": 24, "trivial_lb": 11, "k": 23, "result": "TIMEOUT", "seconds": 1766.041978597641, "vars": 7326, "clauses": 301084, "conf_budget": 8000000}
+{"instance": "rand_n11_m11_d0.4_s1", "n": 11, "density": 0.4, "seed": 1, "heuristic_ub": 19, "trivial_lb": 11, "k": 18, "result": "TIMEOUT", "seconds": 1124.163455247879, "vars": 5201, "clauses": 183824, "conf_budget": 8000000}
