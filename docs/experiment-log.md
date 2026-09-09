@@ -330,3 +330,40 @@ rand_n16                 50       829.0   0.600   0.640   0.700   0.740   0.800 
 anubis                  108      3937.2   0.787   0.787   0.787   0.787   0.833   0.843   0.870   0.889     0.0194
 clefia_m1               110      4035.7   0.809   0.818   0.827   0.827   0.864   0.882   0.882   0.891     0.0138
 ```
+
+## Finding: the free candidate prefilter (eval_topk)
+
+Restricting each BP step to the ~K candidates surviving the free sufficient
+condition `popcount(t XOR u) <= dist[t]-1`:
+
+| instance | n | full BP | K=200 | K=50 | K=20 | K=10 | K=5 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| rand n=16 d0.5 | 16 | 50 | 50 | 50 | 52 | 51 | 51 |
+| rand n=18 d0.5 | 18 | 62 | 62 | 62 | 64 | 64 | 65 |
+| rand n=20 d0.5 | 20 | 73 | 73 | 73 | 75 | 75 | 75 |
+| aes_mixcolumns | 32 | 97 | 97 | 100 | 100 | 101 | 101 |
+| **anubis** | 32 | **108** | 108 | **106** | 108 | 110 | 112 |
+| clefia_m1 | 32 | 110 | 110 | — | — | — | — |
+
+Two results:
+
+**1. The prefilter is a diversifier, not just a speedup.** On ANUBIS, K=50 and
+K=100 reach **106 gates, two better than unrestricted BP's 108** — and 106 is
+exactly the published Boyar-Peralta value (Kranz et al. 2017, via Xiang et al.
+Table 1). Restricting the candidate set changes which of several tied candidates
+the greedy takes, and on this instance that lands in a better basin. This is
+cheap diversification, and it motivates the portfolio search.
+
+**2. Cost/quality is instance-dependent and not uniformly favourable.** On AES,
+K=5 gives a 4.8x wall-clock speedup (2.65 s vs 12.68 s) and 11.5x fewer oracle
+calls, at a cost of 4 gates. On ANUBIS, the K=100 run was *slower* in wall time
+(68.9 s vs 12.8 s) despite 12% fewer oracle calls, because the different
+trajectory keeps target distances larger for longer and the surviving oracle
+calls are individually much more expensive. Fewer oracle calls does not imply
+less oracle work.
+
+Note also that our unrestricted BP gives CLEFIA M1 = 110 against the published
+BP value of 111, and ANUBIS = 108 against 106. BP's tie-breaking rule is
+unspecified in the published work, so our implementation differs in both
+directions; this is the reference-vs-exact distinction already recorded in
+RESULTS.md.
