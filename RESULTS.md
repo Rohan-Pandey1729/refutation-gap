@@ -11,7 +11,7 @@ A mismatch here is a bug, not a result.
 
 | instance | method | ours | published | status | source |
 |---|---|---:|---:|---|---|
-| aes_mixcolumns | bp | - | 97 | not run | Kranz et al., ToSC 2017(4), Tab. 3 |
+| aes_mixcolumns | bp | 97 | 97 | match | Kranz et al., ToSC 2017(4), Tab. 3 |
 | aes_mixcolumns | paar1 | 108 | 108 | match | Kranz et al., ToSC 2017(4), Tab. 3 |
 | anubis | paar1 | 121 | 121 | match | Xiang et al., ToSC 2020(2), Tab. 1 |
 | clefia_m0 | paar1 | - | 121 | not run | Xiang et al., ToSC 2020(2), Tab. 1 |
@@ -27,30 +27,30 @@ not bugs.
 
 | instance | method | ours | reference | delta | source |
 |---|---|---:|---:|---:|---|
-| anubis | bp | - | 106 | - | Kranz et al. 2017, via Xiang Tab. 1 |
+| anubis | bp | 108 | 106 | +2 | Kranz et al. 2017, via Xiang Tab. 1 |
 | clefia_m0 | bp | - | 106 | - | Kranz et al. 2017, via Xiang Tab. 1 |
-| clefia_m1 | bp | - | 111 | - | Kranz et al. 2017, via Xiang Tab. 1 |
+| clefia_m1 | bp | 110 | 111 | -1 | Kranz et al. 2017, via Xiang Tab. 1 |
 | khazad | bp | - | 507 | - | Kranz et al. 2017, via Xiang Tab. 1 |
 | whirlpool | bp | - | 465 | - | Kranz et al. 2017, via Xiang Tab. 1 |
 
 ## Leaderboard
 
-| instance | n | naive | paar1 | paar2 | best (g-XOR) | best published | gap |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| aes_inv_mixcolumns | 32 | 440 | 170 | 165 | 165 | 92 (s-XOR) | +73 |
-| aes_mixcolumns | 32 | 152 | 108 | 108 | 108 | 88 (g-XOR) | +20 |
-| anubis | 32 | 184 | 121 | 120 | 120 | 98 (s-XOR) | +22 |
-| clefia_m1 | 32 | 208 | 121 | 120 | 120 | 103 (s-XOR) | +17 |
-| khazad | 64 | 1232 | 488 | 509 | 488 | 366 (s-XOR) | +122 |
-| whirlpool | 64 | 840 | 481 | 472 | 472 | 417 (g-XOR) | +55 |
-| whirlpool_0 | 64 | 968 | 477 | 463 | 463 | - |  |
+| instance | n | naive | bp | paar1 | paar2 | best (g-XOR) | best published | gap |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| aes_inv_mixcolumns | 32 | 440 | 121 | 170 | 165 | 121 | 92 (s-XOR) | +29 |
+| aes_mixcolumns | 32 | 152 | 97 | 108 | 108 | 97 | 88 (g-XOR) | +9 |
+| anubis | 32 | 184 | 108 | 121 | 120 | 108 | 98 (s-XOR) | +10 |
+| clefia_m1 | 32 | 208 | 110 | 121 | 120 | 110 | 103 (s-XOR) | +7 |
+| khazad | 64 | 1232 | - | 488 | 509 | 488 | 366 (s-XOR) | +122 |
+| whirlpool | 64 | 840 | - | 481 | 472 | 472 | 417 (g-XOR) | +55 |
+| whirlpool_0 | 64 | 968 | - | 477 | 463 | 463 | - |  |
 
 ## Provenance
 
-- recorded results: **14**
+- recorded results: **18**
 - distinct instances: **7**
-- results per method: `paar1`=7, `paar2`=7
-- dirty-tree results: **14** (these must not be used for any published claim)
+- results per method: `bp`=4, `paar1`=7, `paar2`=7
+- dirty-tree results: **18** (these must not be used for any published claim)
 
 ## AES MixColumns g-XOR record history
 
