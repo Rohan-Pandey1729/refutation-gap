@@ -1,0 +1,20 @@
+{
+  "base_acc": 0.9125589662952075,
+  "auc": 0.9999313609310447,
+  "avg_precision": 0.9993571194660288,
+  "pos_rate": 0.0874410337047925,
+  "per_query_us": 48.81791963510115,
+  "train_seconds": 237.37782526016235,
+  "n_train": 1021576,
+  "n_test": 58508,
+  "held_out": [
+    "rand_n8_m8_d0.3_s1",
+    "rand_n8_m8_d0.3_s2",
+    "rand_n8_m8_d0.5_s0",
+    "rand_n8_m8_d0.5_s1",
+    "rand_n8_m8_d0.5_s2",
+    "rand_n8_m8_d0.7_s0",
+    "rand_n8_m8_d0.7_s1",
+    "rand_n8_m8_d0.7_s2"
+  ]
+}
