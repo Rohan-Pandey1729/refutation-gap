@@ -7,3 +7,10 @@
 {"instance": "anubis", "n": 32, "topk": 200, "mode": 1, "seed": 167164485, "gates": 106, "seconds": 13.739487648010254, "ts": 1788937999.1966357}
 {"instance": "clefia_m1", "n": 32, "topk": 100, "mode": 1, "seed": 691573102, "gates": 121, "seconds": 378.2266538143158, "ts": 1788938377.4238021}
 {"instance": "aes_mixcolumns", "n": 32, "topk": 0, "mode": 1, "seed": 729108864, "gates": 98, "seconds": 23.70761513710022, "ts": 1788938401.1320677}
+{"instance": "anubis", "n": 32, "topk": 0, "mode": 1, "seed": 7418728, "gates": 106, "seconds": 54.765990018844604, "ts": 1788938455.8986037}
+{"instance": "clefia_m1", "n": 32, "topk": 0, "mode": 1, "seed": 384128490, "gates": 111, "seconds": 72.61332082748413, "ts": 1788938528.5124707}
+{"instance": "aes_mixcolumns", "n": 32, "topk": 50, "mode": 0, "seed": 890201709, "gates": 100, "seconds": 8.487237453460693, "ts": 1788938537.00033}
+{"instance": "anubis", "n": 32, "topk": 400, "mode": 1, "seed": 805311476, "gates": 105, "seconds": 26.699744701385498, "ts": 1788938563.7005687}
+{"instance": "clefia_m1", "n": 32, "topk": 100, "mode": 1, "seed": 86438386, "gates": 116, "seconds": 98.63845133781433, "ts": 1788938662.3468027}
+{"instance": "aes_mixcolumns", "n": 32, "topk": 100, "mode": 0, "seed": 1072077289, "gates": 100, "seconds": 18.7309148311615, "ts": 1788938681.0824914}
+{"instance": "anubis", "n": 32, "topk": 100, "mode": 1, "seed": 553478475, "gates": 107, "seconds": 30.15940809249878, "ts": 1788938711.2424226}

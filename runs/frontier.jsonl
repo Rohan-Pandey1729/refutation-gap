@@ -1,0 +1,2 @@
+{"instance": "rand_n9_m9_d0.4_s0", "n": 9, "density": 0.4, "seed": 0, "heuristic_ub": 14, "trivial_lb": 8, "k": 13, "result": "SAT", "seconds": 10.862025022506714, "vars": 2541, "clauses": 66105, "conf_budget": 8000000}
+{"instance": "rand_n9_m9_d0.4_s1", "n": 9, "density": 0.4, "seed": 1, "heuristic_ub": 17, "trivial_lb": 9, "k": 16, "result": "SAT", "seconds": 9.398417711257935, "vars": 3354, "clauses": 98619, "conf_budget": 8000000}

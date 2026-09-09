@@ -403,3 +403,57 @@ Tonight's three substantive results are therefore:
 1. A measured refutation of the learned-oracle thesis on cost grounds.
 2. A prior-art refutation of the prefilter's novelty.
 3. The optimality-gap data, which stands.
+
+## 20260909T072543-aggregate_optimality-3de3ec
+
+Aggregate all SAT optimality proofs
+
+- commit: `a0134eb` **(dirty tree)**
+- exit code: `0`  |  wall time: 0.1s
+- full output: `runs/logs/20260909T072543-aggregate_optimality-3de3ec.txt`
+
+```
+$ python3 scripts/aggregate_optimality.py
+# Exact optimality results
+
+Proven-optimal g-XOR counts for small GF(2) matrices, obtained by SAT
+(CaDiCaL) descending from a verified heuristic upper bound until UNSAT.
+
+**Prior art.** The SAT-for-SLP method is Fuhs & Schneider-Kamp, SAT 2010;
+Stoffelen (FSE 2016) applied it to linear matrices. What is new here is
+coverage: exact g-XOR optima for *random* GF(2) matrices, which the
+existing exact work (cipher-derived submatrices, or the s-XOR metric on
+hand-picked instances) does not cover. See SOURCES.md section 6b.
+
+- instances closed: **55**
+- inconclusive (conflict budget exhausted): **5**
+
+## How far are the standard heuristics from optimal?
+
+The upper bound is the best of Paar1, Paar2, Boyar-Peralta and RNBP
+(hundreds of randomized restarts). The gap is that value minus the
+proven optimum.
+
+| gap (gates above optimum) | instances | share |
+|---:|---:|---:|
+| 0 | 38 | 69.1% |
+| 1 | 17 | 30.9% |
+
+Mean gap: **0.31 gates**. The heuristics are exactly optimal on **38/55** of the instances closed here (69%), and never worse than 1 gate(s) above optimum at these sizes.
+
+## By instance size
+
+| n | closed | heuristic optimal | mean gap | mean solve time |
+|---:|---:|---:|---:|---:|
+| 6 | 24 | 23/24 | 0.04 | 0.3 s |
+| 7 | 24 | 10/24 | 0.58 | 5.2 s |
+| 8 | 7 | 5/7 | 0.29 | 8.5 s |
+
+## Full results
+
+| instance | naive | heuristic | via | **optimal** | gap | solve time |
+|---|---:|---:|---|---:|---:|---:|
+| rand_n6_m6_d0.3_s0 | 10 | 8 | paar1 | **8** | +0 | 0.3 s |
+
+... wrote docs/OPTIMALITY.md (55 closed, 5 inconclusive)
+```
