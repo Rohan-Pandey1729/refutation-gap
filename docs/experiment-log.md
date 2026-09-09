@@ -49,3 +49,22 @@ average precision (PR AUC)      : 0.9994   (chance = 0.0874)
 
 saved models/oracle.joblib
 ```
+
+## Note on the first oracle training run (train_oracle_v1)
+
+The default holdout is lexicographic over filenames, which put `rand_n8_*` last
+and therefore trained on n=10,12 and tested on n=8. That measures **downward**
+generalisation, which is the easy direction and not the one that matters: the
+exact oracle is cheap at small n (11 DFS nodes/call at n=8) and explosive at
+large n (3,460 nodes/call at n=20), so a learned replacement is only valuable if
+it generalises **upward**.
+
+The headline numbers from that run (ROC AUC 0.9999, average precision 0.9994
+against a 0.0874 chance rate, 98.96% recall at 98.91% precision) are therefore
+**not** evidence for the claim we care about. `--train-sizes` / `--test-sizes`
+were added to run the correct experiment once larger-n data is collected.
+
+Second caveat from the same run: inference measured 48.8 us/query, which is
+*more* expensive than the exact oracle at n=8. The cost argument only holds at
+larger n. Model size needs to come down (fewer trees, fewer leaves) and that
+tradeoff needs measuring, not assuming.

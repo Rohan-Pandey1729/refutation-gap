@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -63,22 +64,44 @@ def load_dataset(paths, max_records=None):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data", default="data/oracle")
+    ap.add_argument("--data", nargs="+", default=["data/oracle"])
     ap.add_argument("--holdout-frac", type=float, default=0.3)
+    ap.add_argument("--train-sizes", type=int, nargs="*", default=None,
+                    help="train only on instances with these n (from the filename)")
+    ap.add_argument("--test-sizes", type=int, nargs="*", default=None,
+                    help="test only on instances with these n; enables the "
+                         "train-small/test-large generalisation experiment")
+    ap.add_argument("--max-leaf-nodes", type=int, default=63)
     ap.add_argument("--max-iter", type=int, default=300)
     ap.add_argument("--out", default="models/oracle.joblib")
     args = ap.parse_args()
 
-    paths = sorted(Path(args.data).glob("*.npz"))
+    paths = []
+    for d in args.data:
+        paths.extend(sorted(Path(d).glob("*.npz")))
     if not paths:
         print(f"no data in {args.data}", file=sys.stderr)
         return 2
 
-    # Hold out whole INSTANCES, not random rows: the question is whether the
-    # oracle generalises to a matrix it has never seen, not whether it can
-    # memorise queries from a matrix it has.
-    n_hold = max(1, int(len(paths) * args.holdout_frac))
-    train_paths, test_paths = paths[:-n_hold], paths[-n_hold:]
+    def size_of(path):
+        m = re.search(r"_n(\d+)_", path.stem)
+        return int(m.group(1)) if m else -1
+
+    if args.train_sizes or args.test_sizes:
+        # Explicit size split. This is the experiment that matters: the exact
+        # oracle is cheap at small n and explosive at large n, so a learned
+        # replacement is only useful if it generalises UPWARD.
+        train_paths = [p for p in paths if size_of(p) in (args.train_sizes or [])]
+        test_paths = [p for p in paths if size_of(p) in (args.test_sizes or [])]
+    else:
+        # Hold out whole INSTANCES, not random rows.
+        n_hold = max(1, int(len(paths) * args.holdout_frac))
+        train_paths, test_paths = paths[:-n_hold], paths[-n_hold:]
+    if not train_paths or not test_paths:
+        print("empty train or test split", file=sys.stderr)
+        return 2
+    print(f"train sizes: {sorted({size_of(p) for p in train_paths})}   "
+          f"test sizes: {sorted({size_of(p) for p in test_paths})}")
     print(f"train instances: {len(train_paths)}   held-out instances: {len(test_paths)}")
     print(f"held out: {[p.stem for p in test_paths]}")
 
@@ -93,7 +116,7 @@ def main() -> int:
                                  roc_auc_score)
 
     clf = HistGradientBoostingClassifier(
-        max_iter=args.max_iter, learning_rate=0.1, max_leaf_nodes=63,
+        max_iter=args.max_iter, learning_rate=0.1, max_leaf_nodes=args.max_leaf_nodes,
         l2_regularization=1.0, early_stopping=True, validation_fraction=0.1,
         random_state=0)
     t0 = time.time()
@@ -138,11 +161,17 @@ def main() -> int:
     joblib.dump({"model": clf, "feature_names": FEATURE_NAMES}, args.out)
     print(f"\nsaved {args.out}")
 
-    metrics = {"base_acc": float(base_acc), "auc": float(auc),
+    metrics = {"max_iter": args.max_iter, "max_leaf_nodes": args.max_leaf_nodes,
+               "train_sizes": sorted({size_of(p) for p in train_paths}),
+               "test_sizes": sorted({size_of(p) for p in test_paths}),
+               "base_acc": float(base_acc), "auc": float(auc),
                "avg_precision": float(ap_score), "pos_rate": float(yte.mean()),
                "per_query_us": float(per_query_us), "train_seconds": float(train_s),
                "n_train": int(len(ytr)), "n_test": int(len(yte)),
                "held_out": [p.stem for p in test_paths]}
+    mp = Path("runs/oracle_metrics.jsonl")
+    with mp.open("a") as fh:
+        fh.write(json.dumps(metrics) + "\n")
     Path("runs/oracle_metrics.json").write_text(json.dumps(metrics, indent=2))
     return 0
 
