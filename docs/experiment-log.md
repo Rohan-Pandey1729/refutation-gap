@@ -146,3 +146,81 @@ $ python3 scripts/collect_oracle_data.py --instances --suite random --repeats 1 
 
 total records: 16,073,581
 ```
+
+## 20260909T063315-train_oracle_upward-49fc66
+
+THE experiment that matters: train the oracle on SMALL instances (n=8,10,12) and test on LARGE ones (n=15,16,18,20). The exact oracle is cheap at small n and explosive at large n, so a learned replacement is only useful if it generalises upward. Downward generalisation (the first run) proves nothing.
+
+- commit: `62165b1`
+- exit code: `0`  |  wall time: 257.9s
+- full output: `runs/logs/20260909T063315-train_oracle_upward-49fc66.txt`
+
+```
+$ python3 scripts/train_oracle.py --data data/oracle data/oracle_large --train-sizes 8 10 12 --test-sizes 15 16 18 20 --max-iter 300 --max-per-instance 60000
+train sizes: [8, 10, 12]   test sizes: [15, 16, 18, 20]
+train instances: 27   held-out instances: 36
+held out: ['rand_n15_m15_d0.3_s0', 'rand_n15_m15_d0.3_s1', 'rand_n15_m15_d0.3_s2', 'rand_n15_m15_d0.5_s0', 'rand_n15_m15_d0.5_s1', 'rand_n15_m15_d0.5_s2', 'rand_n15_m15_d0.7_s0', 'rand_n15_m15_d0.7_s1', 'rand_n15_m15_d0.7_s2', 'rand_n16_m16_d0.3_s0', 'rand_n16_m16_d0.3_s1', 'rand_n16_m16_d0.3_s2', 'rand_n16_m16_d0.5_s0', 'rand_n16_m16_d0.5_s1', 'rand_n16_m16_d0.5_s2', 'rand_n16_m16_d0.7_s0', 'rand_n16_m16_d0.7_s1', 'rand_n16_m16_d0.7_s2', 'rand_n18_m18_d0.3_s0', 'rand_n18_m18_d0.3_s1', 'rand_n18_m18_d0.3_s2', 'rand_n18_m18_d0.5_s0', 'rand_n18_m18_d0.5_s1', 'rand_n18_m18_d0.5_s2', 'rand_n18_m18_d0.7_s0', 'rand_n18_m18_d0.7_s1', 'rand_n18_m18_d0.7_s2', 'rand_n20_m20_d0.3_s0', 'rand_n20_m20_d0.3_s1', 'rand_n20_m20_d0.3_s2', 'rand_n20_m20_d0.5_s0', 'rand_n20_m20_d0.5_s1', 'rand_n20_m20_d0.5_s2', 'rand_n20_m20_d0.7_s0', 'rand_n20_m20_d0.7_s1', 'rand_n20_m20_d0.7_s2']
+train (826243, 30)  test (2160000, 30)  (11.8s to featurize)
+positive rate: train 0.0471  test 0.0213
+
+trained in 178.4s
+inference: 29.04 us/query  (2,160,000 queries in 62.73s)
+
+constant-'no' accuracy baseline : 0.9787
+model accuracy @0.5             : 0.9738
+ROC AUC                         : 0.9824
+average precision (PR AUC)      : 0.8451   (chance = 0.0213)
+
+ threshold   recall  precision  flagged/query
+    0.0009   0.9900     0.0788         0.2675
+    0.0182   0.9500     0.1463         0.1382
+    0.1201   0.9000     0.2506         0.0764
+    0.7905   0.8000     0.6330         0.0269
+    1.0000   0.4862     1.0000         0.0103
+
+saved models/oracle.joblib
+```
+
+## Finding: upward generalisation, and the cost crossover (train_oracle_upward)
+
+Training on n=8,10,12 and testing on n=15,16,18,20 — the direction that matters —
+gives a much weaker picture than the downward split:
+
+| metric | downward (train 10,12 → test 8) | upward (train 8,10,12 → test 15..20) |
+|---|---:|---:|
+| ROC AUC | 0.9999 | 0.9824 |
+| average precision | 0.9994 (chance 0.0874) | 0.8451 (chance 0.0213) |
+| recall @ 90% precision | ~0.99 | — |
+| precision @ 90% recall | 0.989 | 0.251 |
+| accuracy @0.5 | 0.9979 | 0.9738 |
+| constant-"no" baseline | 0.9126 | **0.9787** |
+
+Two things to be clear about:
+
+1. **Model accuracy (0.9738) is BELOW the constant-"no" baseline (0.9787).** A
+   model that always answered "no" would score higher. This is exactly the trap
+   flagged before training, and it is why accuracy is not the metric. Average
+   precision of 0.845 against a chance rate of 0.021 is a ~40x lift, so the model
+   is far from useless — but it is not a drop-in replacement.
+
+2. **The cost argument currently fails at this scale.** Inference measured
+   29.0 us/query. The exact oracle at n=20 averages 3,460 DFS nodes/call, and
+   from the n=20 timing (3.65e9 nodes in 8.03 s) a node costs ~2.2 ns, so the
+   exact oracle costs ~7.6 us/call. **The learned oracle is ~4x MORE expensive
+   than the exact oracle it is supposed to replace, at n=20.**
+
+### What this implies
+
+Replacement is the wrong architecture. Two consequences follow:
+
+- **Use it as a prefilter, not a replacement.** Precision losses cost nothing if
+  every flagged query is then confirmed by the exact oracle — only recall losses
+  cost quality. At 99% recall the model flags 26.8% of queries (3.7x fewer exact
+  calls); at 95% recall, 13.8% (7.2x fewer).
+- **There is a crossover in n, and it is above 20.** Exact-oracle cost per call
+  grows ~2x per +1 in n in the tail; model cost is roughly flat. Extrapolating,
+  crossover sits near n=22-24. The cipher matrices we care about are n=32 and
+  n=64, i.e. well past it — but that must be MEASURED, not extrapolated.
+
+Next: measure exact-oracle us/call directly at n up to 32 (AES MixColumns) and
+find the actual crossover, and cut model size to move it left.
