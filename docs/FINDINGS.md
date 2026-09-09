@@ -114,18 +114,31 @@ Using SAT (CaDiCaL) to descend from a verified heuristic upper bound until UNSAT
 Mean gap **0.20 gates**. But the aggregate hides the trend that matters — the
 heuristics degrade steadily with instance size:
 
-| n | closed | heuristic exactly optimal | mean gap |
-|---:|---:|---:|---:|
-| 6 | 60 | 56/60 (93%) | 0.07 |
-| 7 | 54 | 38/54 (70%) | 0.30 |
-| 8 | 11 | 7/11 (64%) | 0.36 |
-| 9–10 | (frontier runs) | **0/4** | ≥1 |
+| n | closed | heuristic exactly optimal | mean gap | mean solve time |
+|---:|---:|---:|---:|---:|
+| 6 | 60 | 56/60 (93%) | 0.07 | 0.2 s |
+| 7 | 54 | 38/54 (70%) | 0.30 | 6.7 s |
+| 8 | 9 | 5/9 (56%) | 0.56 | 17.7 s |
+| 9 | 2 | 2/2 (100%) | 0.00 | 45.0 s |
 
-At n=6 the standard heuristics are essentially always optimal. By n=9–10, every
-instance the solver could settle showed the heuristic leaving at least one gate
-on the table. Extrapolating that trend to n=32 is exactly the wrong move — but it
-does say the published cipher figures are unlikely to be optimal, and that the
-88-gate AES MixColumns record probably still has room in it.
+The trend from n=6 to n=8 is monotone: 93% → 70% → 56% exactly optimal, with the
+mean gap rising from 0.07 to 0.56 gates. **The n=9 row is not evidence against
+this** — it is two instances, both at density 0.3–0.5, and a sample that small
+says nothing.
+
+The separate frontier runs point the other way at n=9: on two density-0.4
+instances, asking only "is there a circuit one gate smaller than the best
+heuristic found?" returned SAT both times, i.e. the heuristic was *not* optimal
+on either. Those are different instances at a different density from the two
+closed above, so the two observations do not contradict each other — but together
+they mean **the n≥9 picture is unresolved on this sample**, and the honest
+statement is the n=6→8 trend alone.
+
+What that trend does suggest, without proving it, is that the standard heuristics
+degrade as instances grow, and therefore that published cipher-matrix figures at
+n=32 are unlikely to be optimal. It says nothing about how much room is left in
+the 88-gate AES MixColumns record; extrapolating a trend measured at n≤8 across
+two orders of magnitude of search space would be unfounded.
 
 The SAT method itself is **not** new — Fuhs & Schneider-Kamp (SAT 2010) introduced
 exactly this reduction, and Stoffelen (FSE 2016) applied it to linear matrices.
