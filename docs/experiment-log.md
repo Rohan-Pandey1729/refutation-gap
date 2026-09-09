@@ -535,3 +535,34 @@ not bugs.
 Our search produces **g-XOR** programs. Where the best published figure above is s-XOR, it is still the bar to beat: s-XOR programs are valid g-XOR programs, so an s-XOR count is a g-XOR upper bound.
 
 ```
+
+## 20260909T074559-certify_portfolio-c6637d
+
+Symbolically prove (over all 2^n inputs) and emit Lean certificates for the best circuits found overnight.
+
+- commit: `52b8ddc`
+- exit code: `0`  |  wall time: 3.5s
+- full output: `runs/logs/20260909T074559-certify_portfolio-c6637d.txt`
+
+```
+$ python3 -c 
+import sys, json, time; sys.path.insert(0,'.')
+from pathlib import Path
+from slp.benchmarks import registry
+from slp.instance import verify
+from slp.verify.symbolic import verify_symbolic_fast
+from slp.verify.lean_cert import emit
+best = json.loads(Path('runs/portfolio_best.json').read_text())
+for name, b in sorted(best.items()):
+    inst = registry.get(name)
+    prog = [tuple(op) for op in b['program']]
+    g = verify(inst, prog)
+    t0=time.time(); res = verify_symbolic_fast(inst, prog); dt=time.time()-t0
+    cert = Path(f'lean/certs/{name}_best_{g}.lean')
+    emit(inst, prog, cert, method=f"portfolio k={b['topk']} mode={b['mode']} seed={b['seed']}", run='portfolio_overnight')
+    print(f'  {name:20s} {g:4d} gates  bitmask=OK  symbolic={res["z3_result"]} ({dt:.2f}s)  -> {cert}')
+
+  aes_mixcolumns         98 gates  bitmask=OK  symbolic=unsat (proved) (0.35s)  -> lean/certs/aes_mixcolumns_best_98.lean
+  anubis                105 gates  bitmask=OK  symbolic=unsat (proved) (0.42s)  -> lean/certs/anubis_best_105.lean
+  clefia_m1             110 gates  bitmask=OK  symbolic=unsat (proved) (0.70s)  -> lean/certs/clefia_m1_best_110.lean
+```
