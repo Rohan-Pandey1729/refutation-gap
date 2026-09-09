@@ -1,5 +1,24 @@
 # Learned search for Shortest Linear Straight-Line Programs over GF(2)
 
+> **Status: concluded, not submitted.** This project set out to beat a record on
+> XOR-count minimization. It did not. The central thesis was refuted by
+> measurement, two fallback directions turned out to be prior art, and an
+> adversarial audit of the write-up found a double-counting bug and a censored
+> statistic whose published value fell outside the interval the data supported.
+> All of that is documented rather than removed.
+>
+> It is kept public as a **record of method, not a claim**. The verification
+> layering, the prior-art discipline in [`SOURCES.md`](SOURCES.md), and the
+> self-audit in [`docs/verification-log.md`](docs/verification-log.md) are the
+> parts worth reading. Start with [`docs/FINDINGS.md`](docs/FINDINGS.md).
+>
+> **Why it was not submitted.** The headline negative result shows that a
+> Python/sklearn oracle is slower than a C DFS — not that a *learned* oracle is,
+> since the compiled version the argument requires was never written. The
+> optimality data covers random matrices at n=6–9 by a method from 2010, with no
+> DRAT certificates for the UNSAT answers that carry every lower bound. Neither
+> half stands on its own.
+
 Given a matrix over GF(2), find the **minimum number of XOR gates** computing
 every row from the inputs. NP-hard (Boyar–Matthews–Peralta, MFCS 2008). For
 essentially every benchmark instance in the literature **the true optimum is
