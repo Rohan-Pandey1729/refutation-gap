@@ -224,3 +224,91 @@ Replacement is the wrong architecture. Two consequences follow:
 
 Next: measure exact-oracle us/call directly at n up to 32 (AES MixColumns) and
 find the actual crossover, and cut model size to move it left.
+
+## 20260909T064226-measure_crossover-dcc596
+
+Decisive cost measurement: is the learned oracle actually cheaper than the exact DFS it replaces, and at what n does that flip? Includes the 32-input cipher matrices we actually care about.
+
+- commit: `140af29`
+- exit code: `0`  |  wall time: 75.5s
+- full output: `runs/logs/20260909T064226-measure_crossover-dcc596.txt`
+
+```
+$ python3 scripts/measure_crossover.py --sizes 8 10 12 14 16 18 20 --ciphers aes_mixcolumns anubis clefia_m1
+instance                 n  gates    wall_s        calls   nodes/call    us/call
+rand_n8_d0.5             8     15     0.001        4,697         10.9      0.272
+rand_n10_d0.5           10     22     0.004       18,150          8.6      0.215
+rand_n12_d0.5           12     29     0.005       46,601         43.8      0.114
+rand_n14_d0.5           14     36     0.038      120,666         62.6      0.313
+rand_n16_d0.5           16     50     0.287      306,327        328.6      0.937
+rand_n18_d0.5           18     62     4.336      582,291       2224.6      7.446
+rand_n20_d0.5           20     73    12.712    1,054,051       3460.4     12.061
+aes_mixcolumns          32     97    11.929    3,970,567        976.7      3.004
+anubis                  32    108    12.830    5,645,379        654.4      2.273
+clefia_m1               32    110    19.110    6,718,881        800.6      2.844
+
+model inference: 59.561 us/query (featurize 26.903 + predict 32.658)
+
+instance                us/call exact  us/query model    ratio  verdict
+rand_n8_d0.5                    0.272          59.561     0.00  exact cheaper
+rand_n10_d0.5                   0.215          59.561     0.00  exact cheaper
+rand_n12_d0.5                   0.114          59.561     0.00  exact cheaper
+rand_n14_d0.5                   0.313          59.561     0.01  exact cheaper
+rand_n16_d0.5                   0.937          59.561     0.02  exact cheaper
+rand_n18_d0.5                   7.446          59.561     0.13  exact cheaper
+rand_n20_d0.5                  12.061          59.561     0.20  exact cheaper
+aes_mixcolumns                  3.004          59.561     0.05  exact cheaper
+anubis                          2.273          59.561     0.04  exact cheaper
+clefia_m1                       2.844          59.561     0.05  exact cheaper
+```
+
+## KEY NEGATIVE RESULT: the learned-oracle thesis, as originally stated, is refuted (measure_crossover)
+
+Measured exact-oracle cost per call against measured model inference cost, on the
+same machine, including the cipher matrices the project actually targets:
+
+| instance | n | gates | oracle calls | nodes/call | us/call (exact) |
+|---|---:|---:|---:|---:|---:|
+| rand n=8 d0.5 | 8 | 15 | 4,697 | 10.9 | 0.272 |
+| rand n=12 d0.5 | 12 | 29 | 46,601 | 43.8 | 0.114 |
+| rand n=16 d0.5 | 16 | 50 | 306,327 | 328.6 | 0.937 |
+| rand n=18 d0.5 | 18 | 62 | 582,291 | 2,224.6 | 7.446 |
+| rand n=20 d0.5 | 20 | 73 | 1,054,051 | 3,460.4 | 12.061 |
+| **aes_mixcolumns** | **32** | **97** | **3,970,567** | **976.7** | **3.004** |
+| anubis | 32 | 108 | 5,645,379 | 654.4 | 2.273 |
+| clefia_m1 | 32 | 110 | 6,718,881 | 800.6 | 2.844 |
+
+Model inference: **59.56 us/query** (26.9 featurize + 32.7 sklearn predict).
+
+**The exact oracle is cheaper than the learned oracle at every size measured**,
+by 5x at n=20 and by 20x on AES MixColumns. The original thesis — replace the
+oracle with a cheap learned estimator — does not survive contact with the
+measurement.
+
+### Two things the measurement revealed
+
+**1. Structure makes the exact oracle dramatically cheaper.** AES MixColumns at
+n=32 needs 977 DFS nodes/call; a *random* matrix at n=20 needs 3,460. The
+cryptographic matrices are far easier per call than random matrices of similar or
+smaller size, because their algebraic structure keeps distances small. Random
+benchmark instances are a misleading proxy for the real targets — the earlier
+n=8..20 scaling table, taken alone, overstated the difficulty of the real problem.
+
+**2. The bottleneck claim is still true; the proposed fix was wrong.** BP does
+3.97M oracle calls on AES at ~3 us each, which is essentially the entire 11.9 s
+runtime. The oracle *is* where the time goes. But its per-call cost is small, so
+a per-query learned replacement must cost under ~2 us to pay. Python featurization
+plus sklearn inference costs 30x that. A C-compiled small ensemble might reach
+~0.3 us, leaving perhaps 10x headroom — real, but far less than assumed.
+
+### Redirect
+
+The better target for learning is not the oracle's ANSWER but the search's
+CANDIDATE SET. BP evaluates every pair of signals against every unsolved target
+each step: on AES that is millions of oracle calls, the overwhelming majority on
+pairs that are obviously useless. A model that ranks candidate PAIRS amortises
+one inference over many queries, instead of competing with a 3 us DFS on every
+single query.
+
+That is the next experiment. This negative result is kept in full, and in the
+paper: the dead end is the finding.

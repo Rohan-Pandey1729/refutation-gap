@@ -1,0 +1,11 @@
+{"instance": "rand_n8_d0.5", "n": 8, "gates": 15, "wall_s": 0.0012764930725097656, "oracle_calls": 4697, "oracle_nodes": 51189, "nodes_per_call": 10.898232914626357, "us_per_call": 0.2717677395166629}
+{"instance": "rand_n10_d0.5", "n": 10, "gates": 22, "wall_s": 0.003909111022949219, "oracle_calls": 18150, "oracle_nodes": 155848, "nodes_per_call": 8.586666666666666, "us_per_call": 0.2153780177933454}
+{"instance": "rand_n12_d0.5", "n": 12, "gates": 29, "wall_s": 0.005315542221069336, "oracle_calls": 46601, "oracle_nodes": 2042747, "nodes_per_call": 43.83483187056072, "us_per_call": 0.11406498189028853}
+{"instance": "rand_n14_d0.5", "n": 14, "gates": 36, "wall_s": 0.037811994552612305, "oracle_calls": 120666, "oracle_nodes": 7551888, "nodes_per_call": 62.58505295609368, "us_per_call": 0.31336080215315254}
+{"instance": "rand_n16_d0.5", "n": 16, "gates": 50, "wall_s": 0.2870659828186035, "oracle_calls": 306327, "oracle_nodes": 100661490, "nodes_per_call": 328.60795816235594, "us_per_call": 0.9371226918247609}
+{"instance": "rand_n18_d0.5", "n": 18, "gates": 62, "wall_s": 4.335884094238281, "oracle_calls": 582291, "oracle_nodes": 1295390666, "nodes_per_call": 2224.6448356577725, "us_per_call": 7.446249545739641}
+{"instance": "rand_n20_d0.5", "n": 20, "gates": 73, "wall_s": 12.712496042251587, "oracle_calls": 1054051, "oracle_nodes": 3647450974, "nodes_per_call": 3460.412232425186, "us_per_call": 12.06060811312886}
+{"instance": "aes_mixcolumns", "n": 32, "gates": 97, "wall_s": 11.929059982299805, "oracle_calls": 3970567, "oracle_nodes": 3877867359, "nodes_per_call": 976.6532988865318, "us_per_call": 3.0043719152201196}
+{"instance": "anubis", "n": 32, "gates": 108, "wall_s": 12.83006238937378, "oracle_calls": 5645379, "oracle_nodes": 3694347679, "nodes_per_call": 654.4020656540508, "us_per_call": 2.272666261977058}
+{"instance": "clefia_m1", "n": 32, "gates": 110, "wall_s": 19.110134840011597, "oracle_calls": 6718881, "oracle_nodes": 5379013292, "nodes_per_call": 800.5817176997182, "us_per_call": 2.844243682841175}
+{"model_us_per_query": 59.56098437309265}
