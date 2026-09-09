@@ -147,3 +147,35 @@ negative results are the most valuable part and should lead, not be buried.
 - Did not implement the s-XOR metric, so several best-known values are not
   directly comparable to our output.
 - Did not resolve the AES InvMixColumns anomaly (SOURCES.md 8b).
+
+## 6. Where modern SAT stalls
+
+Fuhs & Schneider-Kamp (SAT 2010) proved a 13-gate 8-input instance optimal and
+failed to settle a 21×8 instance at k=22 after 40+ days of solver time. An
+independent literature check found no evidence that anyone has revisited that
+wall with a modern solver.
+
+Measured here with CaDiCaL, on random density-0.4 instances, asking only the
+single decisive question "is there a program with one fewer gate than the best
+heuristic found?":
+
+| instance | trivial lb | heuristic ub | k | result | time | clauses |
+|---|---:|---:|---:|---|---:|---:|
+| rand n=9 s0 | 8 | 14 | 13 | **SAT** | 10.9 s | 66,105 |
+| rand n=9 s1 | 9 | 17 | 16 | **SAT** | 9.4 s | 98,619 |
+| rand n=10 s0 | 9 | 19 | 18 | **TIMEOUT** (8M conflicts) | 1,863.2 s | 152,377 |
+| rand n=10 s1 | 10 | 20 | 19 | **SAT** | 314.3 s | 170,191 |
+
+Two observations.
+
+**The wall has moved, but not far.** Sixteen years of solver progress moves the
+frontier from roughly n=8 to roughly n=9–10 on this problem. At n=10 the
+behaviour is already erratic: one instance settles in 314 s, its sibling exhausts
+an 8M-conflict budget after half an hour. This is a genuinely hard encoding, and
+incremental solver improvement is not going to reach the n=32 cipher matrices.
+
+**Every SAT call here returned SAT, not UNSAT.** At n=9 and n=10 the best of
+Paar1/Paar2/BP/RNBP over hundreds of restarts was *never* optimal — the solver
+improved on it every time it answered at all. That is a sharper version of the
+optimality-gap result: at n≤8 the heuristics are optimal ~69% of the time, but by
+n=9–10 they are leaving gates on the table consistently.

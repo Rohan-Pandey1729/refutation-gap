@@ -1,2 +1,4 @@
 {"instance": "rand_n9_m9_d0.4_s0", "n": 9, "density": 0.4, "seed": 0, "heuristic_ub": 14, "trivial_lb": 8, "k": 13, "result": "SAT", "seconds": 10.862025022506714, "vars": 2541, "clauses": 66105, "conf_budget": 8000000}
 {"instance": "rand_n9_m9_d0.4_s1", "n": 9, "density": 0.4, "seed": 1, "heuristic_ub": 17, "trivial_lb": 9, "k": 16, "result": "SAT", "seconds": 9.398417711257935, "vars": 3354, "clauses": 98619, "conf_budget": 8000000}
+{"instance": "rand_n10_m10_d0.4_s0", "n": 10, "density": 0.4, "seed": 0, "heuristic_ub": 19, "trivial_lb": 9, "k": 18, "result": "TIMEOUT", "seconds": 1863.195261478424, "vars": 4528, "clauses": 152377, "conf_budget": 8000000}
+{"instance": "rand_n10_m10_d0.4_s1", "n": 10, "density": 0.4, "seed": 1, "heuristic_ub": 20, "trivial_lb": 10, "k": 19, "result": "SAT", "seconds": 314.28296160697937, "vars": 4912, "clauses": 170191, "conf_budget": 8000000}
