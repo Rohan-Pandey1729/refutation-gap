@@ -5,3 +5,5 @@
 {"instance": "clefia_m1", "n": 32, "topk": 200, "mode": 1, "seed": 762144912, "gates": 110, "seconds": 25.24111247062683, "ts": 1788937951.6291497}
 {"instance": "aes_mixcolumns", "n": 32, "topk": 400, "mode": 1, "seed": 357712575, "gates": 98, "seconds": 33.82448935508728, "ts": 1788937985.455334}
 {"instance": "anubis", "n": 32, "topk": 200, "mode": 1, "seed": 167164485, "gates": 106, "seconds": 13.739487648010254, "ts": 1788937999.1966357}
+{"instance": "clefia_m1", "n": 32, "topk": 100, "mode": 1, "seed": 691573102, "gates": 121, "seconds": 378.2266538143158, "ts": 1788938377.4238021}
+{"instance": "aes_mixcolumns", "n": 32, "topk": 0, "mode": 1, "seed": 729108864, "gates": 98, "seconds": 23.70761513710022, "ts": 1788938401.1320677}

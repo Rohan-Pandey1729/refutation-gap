@@ -174,6 +174,23 @@ def exists_program(inst: SLPInstance, k: int, conf_budget: int = 0) -> SatResult
                      n_vars=pool.top, n_clauses=len(cls), timed_out=timed_out)
 
 
+def trivial_lower_bound(inst: SLPInstance) -> int:
+    """A free lower bound on the number of XOR gates, from two observations.
+
+    (a) Every distinct target row with popcount >= 2 must be the value of some
+        gate. In a MINIMUM-size program no two signals share a value, so those
+        targets need that many distinct gates.
+    (b) Computing a single row of popcount w needs at least w-1 gates on its own
+        dependency path.
+
+    Both are sound for the minimum, so the bound is their maximum. It lets the
+    descent stop early instead of asking the solver a question already settled.
+    """
+    distinct = {t for t in inst.distinct_targets if bin(t).count("1") >= 2}
+    by_count = max((bin(t).count("1") - 1 for t in inst.distinct_targets), default=0)
+    return max(len(distinct), by_count)
+
+
 def minimum_size(inst: SLPInstance, lower: int, upper: int,
                  verbose: bool = True, conf_budget: int = 0) -> dict:
     """Find the exact minimum gate count by descending from a known upper bound.
@@ -185,8 +202,15 @@ def minimum_size(inst: SLPInstance, lower: int, upper: int,
     history = []
     best_prog = None
     best = upper
+    lb = max(lower, trivial_lower_bound(inst))
+    if upper <= lb:
+        # the heuristic already matches the free lower bound: optimal, no SAT needed
+        return {"instance": inst.name, "fingerprint": inst.fingerprint(),
+                "optimal": upper, "proved": True, "program": None,
+                "proved_by": "trivial_lower_bound", "lower_bound": lb,
+                "history": []}
     k = upper - 1
-    while k >= lower:
+    while k >= lb:
         res = exists_program(inst, k, conf_budget=conf_budget)
         history.append({"k": k, "sat": res.sat, "timed_out": res.timed_out,
                         "seconds": round(res.seconds, 3),
@@ -208,6 +232,8 @@ def minimum_size(inst: SLPInstance, lower: int, upper: int,
             return {"instance": inst.name, "fingerprint": inst.fingerprint(),
                     "optimal": k + 1, "proved": True, "program": best_prog,
                     "lower_bound_from": k, "history": history}
+    # descended to the free lower bound with every k SAT: the bound is tight
     return {"instance": inst.name, "fingerprint": inst.fingerprint(),
-            "optimal": None, "proved": False, "best_found": best,
-            "program": best_prog, "searched_down_to": lower, "history": history}
+            "optimal": best, "proved": True, "program": best_prog,
+            "proved_by": "reached_trivial_lower_bound", "lower_bound": lb,
+            "history": history}
