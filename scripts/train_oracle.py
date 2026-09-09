@@ -30,7 +30,14 @@ from slp.instance import apply_program
 from slp.oracle.features import FEATURE_NAMES, featurize_batch
 
 
-def load_dataset(paths, max_records=None):
+def load_dataset(paths, max_per_instance=None, rng=None):
+    """Featurize records from each npz.
+
+    max_per_instance uniformly subsamples within each instance. Subsampling is
+    uniform over queries, so the positive rate is preserved in expectation;
+    truncation would not be, because query difficulty drifts as the search runs.
+    """
+    rng = rng or np.random.default_rng(0)
     X, y, groups = [], [], []
     for path in paths:
         d = np.load(path, allow_pickle=True)
@@ -41,6 +48,10 @@ def load_dataset(paths, max_records=None):
         keep = label >= 0                      # drop capped/unlabelled
         rep, step, xs, budget, label = (rep[keep], step[keep], xs[keep],
                                         budget[keep], label[keep])
+        if max_per_instance and len(label) > max_per_instance:
+            pick = rng.choice(len(label), size=max_per_instance, replace=False)
+            rep, step, xs, budget, label = (rep[pick], step[pick], xs[pick],
+                                            budget[pick], label[pick])
         order = np.lexsort((step, rep))
         rep, step, xs, budget, label = (rep[order], step[order], xs[order],
                                         budget[order], label[order])
@@ -56,8 +67,6 @@ def load_dataset(paths, max_records=None):
                                      budget[lo:hi].astype(np.int16)))
             y.append(label[lo:hi])
             groups.append(np.full(hi - lo, hash(Path(path).stem) & 0xFFFF))
-        if max_records and sum(len(a) for a in y) > max_records:
-            break
     return (np.concatenate(X), np.concatenate(y).astype(np.int8),
             np.concatenate(groups))
 
@@ -72,6 +81,8 @@ def main() -> int:
                     help="test only on instances with these n; enables the "
                          "train-small/test-large generalisation experiment")
     ap.add_argument("--max-leaf-nodes", type=int, default=63)
+    ap.add_argument("--max-per-instance", type=int, default=60000,
+                    help="uniform subsample cap per instance, to bound memory")
     ap.add_argument("--max-iter", type=int, default=300)
     ap.add_argument("--out", default="models/oracle.joblib")
     args = ap.parse_args()
@@ -106,8 +117,8 @@ def main() -> int:
     print(f"held out: {[p.stem for p in test_paths]}")
 
     t0 = time.time()
-    Xtr, ytr, _ = load_dataset(train_paths)
-    Xte, yte, _ = load_dataset(test_paths)
+    Xtr, ytr, _ = load_dataset(train_paths, args.max_per_instance)
+    Xte, yte, _ = load_dataset(test_paths, args.max_per_instance)
     print(f"train {Xtr.shape}  test {Xte.shape}  ({time.time()-t0:.1f}s to featurize)")
     print(f"positive rate: train {ytr.mean():.4f}  test {yte.mean():.4f}")
 
