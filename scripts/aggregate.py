@@ -11,15 +11,56 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from slp.benchmarks import registry
 from slp.tracking import REPO, load_index
 
+# Best published values, per instance.
+#
+# METRIC WARNING. Two incompatible metrics appear in this literature:
+#   g-XOR  arbitrary straight-line program, temporary registers allowed.
+#   s-XOR  sequential / in-place: only x_i <- x_i XOR x_j, no new registers.
+# s-XOR is STRICTLY more restrictive, so every s-XOR program is also a valid
+# g-XOR program. An s-XOR count is therefore a valid g-XOR upper bound, but a
+# g-XOR count says nothing about s-XOR.
+#
+# Our search produces g-XOR programs. The bar we must beat is therefore the
+# minimum over BOTH metrics -- which for several instances is the s-XOR value.
+# Comparing our g-XOR output only against published g-XOR figures would be a
+# false record claim.
 PUBLISHED = {
-    # instance -> (best published gate count, reference)
-    "aes_mixcolumns": (88, "eprint 2026/1481"),
+    # instance: (best known, metric, reference)
+    "aes_mixcolumns":     (88,  "g-XOR", "Jean, ePrint 2026/1481 (2026)"),
+    "aes_inv_mixcolumns": (92,  "s-XOR", "Xiang et al., ToSC 2020(2) / ePrint 2020/903, Tab. 4"),
+    "anubis":             (98,  "s-XOR", "Xiang et al., ToSC 2020(2), Tab. 1"),
+    "clefia_m0":          (97,  "s-XOR", "Yuan et al., ToSC 2024(2):322-347, Tab. 2"),
+    "clefia_m1":          (103, "s-XOR", "Xiang et al., ToSC 2020(2), Tab. 1"),
+    "khazad":             (366, "s-XOR", "Xiang et al., ToSC 2020(2), Tab. 1"),
+    "whirlpool":          (417, "g-XOR", "Sun, Yang & Li, ePrint 2025/1493, Tab. 5"),
 }
+
+# Verified reproductions our implementation must continue to match.
 REPRO_TARGETS = {
-    # (instance, method) -> published value our implementation must match
-    ("aes_mixcolumns", "paar1"): 108,
-    ("aes_mixcolumns", "bp"): 97,
+    ("aes_mixcolumns", "paar1"): (108, "Kranz-Leander-Stoffelen-Wiemer, ToSC 2017(4), Tab. 3"),
+    ("aes_mixcolumns", "bp"):    (97,  "Kranz-Leander-Stoffelen-Wiemer, ToSC 2017(4), Tab. 3"),
+    ("khazad", "paar1"):         (488, "Xiang et al., ToSC 2020(2), Tab. 1"),
+    ("whirlpool", "paar1"):      (481, "Xiang et al., ToSC 2020(2), Tab. 1"),
+    ("anubis", "paar1"):         (121, "Xiang et al., ToSC 2020(2), Tab. 1"),
+    ("clefia_m1", "paar1"):      (121, "Xiang et al., ToSC 2020(2), Tab. 1"),
+    ("anubis", "bp"):            (106, "Kranz et al. ToSC 2017(4), via Xiang Tab. 1"),
+    ("clefia_m1", "bp"):         (111, "Kranz et al. ToSC 2017(4), via Xiang Tab. 1"),
+    ("khazad", "bp"):            (507, "Kranz et al. ToSC 2017(4), via Xiang Tab. 1"),
+    ("whirlpool", "bp"):         (465, "Kranz et al. ToSC 2017(4), via Xiang Tab. 1"),
 }
+
+# AES MixColumns g-XOR record history. Used only for documentation.
+AES_HISTORY = [
+    (108, "Satoh et al. ASIACRYPT 2001 / Banik et al. INDOCRYPT 2016", "architectural"),
+    (103, "Jean, Moradi, Peyrin, Sasdrich, Bit-Sliding, CHES 2017", "heuristic"),
+    (97,  "Kranz, Leander, Stoffelen, Wiemer, ToSC 2017(4)", "Boyar-Peralta"),
+    (95,  "Banik, Funabiki, Isobe, IWSEC 2019", "heuristic"),
+    (94,  "Tan & Peyrin, TCHES 2020(1)", "A1/A2 heuristics"),
+    (92,  "Maximov, ePrint 2019/833", "dedicated search"),
+    (91,  "Lin, Xiang, Zeng, Zhang, CT-RSA 2021", "framework"),
+    (89,  "Sun, Yang, Li, ePrint 2025/1493", "revisited Boyar-Peralta"),
+    (88,  "Jean, ePrint 2026/1481", "LLM-assisted (OpenAI codex), no method published"),
+]
 
 
 def main() -> int:
@@ -43,20 +84,21 @@ def main() -> int:
            "from scratch by `slp.instance.verify` before being recorded.", ""]
 
     out += ["## Reproduction of published baselines", "",
-            "| instance | method | ours | published | status |",
-            "|---|---|---:|---:|---|"]
-    for (inst, method), published in sorted(REPRO_TARGETS.items()):
+            "| instance | method | ours | published | status | source |",
+            "|---|---|---:|---:|---|---|"]
+    for (inst, method), (published, ref) in sorted(REPRO_TARGETS.items()):
         got = by_inst_method.get((inst, method))
         if got is None:
-            out.append(f"| {inst} | {method} | - | {published} | not run |")
+            out.append(f"| {inst} | {method} | - | {published} | not run | {ref} |")
             continue
         status = "match" if got["gates"] == published else (
-            "BETTER" if got["gates"] < published else "MISMATCH")
-        out.append(f"| {inst} | {method} | {got['gates']} | {published} | {status} |")
+            "BETTER" if got["gates"] < published else "**MISMATCH**")
+        out.append(f"| {inst} | {method} | {got['gates']} | {published} | {status} | {ref} |")
     out.append("")
 
     out += ["## Leaderboard", "",
-            "| instance | n | naive | " + " | ".join(methods) + " | best | published | gap |",
+            "| instance | n | naive | " + " | ".join(methods) +
+            " | best (g-XOR) | best published | gap |",
             "|---|---:|---:|" + "---:|" * (len(methods) + 3)]
     for inst in instances:
         cells = []
@@ -70,11 +112,11 @@ def main() -> int:
                 cells.append(str(r["gates"]))
                 n, naive = r.get("n_inputs"), r["naive"]
                 best = r["gates"] if best is None else min(best, r["gates"])
-        pub, ref = PUBLISHED.get(inst, (None, None))
+        pub, metric, ref = PUBLISHED.get(inst, (None, None, None))
         gap = "" if pub is None or best is None else f"{best - pub:+d}"
+        pubcell = "-" if pub is None else f"{pub} ({metric})"
         out.append(f"| {inst} | {n or ''} | {naive or ''} | " + " | ".join(cells) +
-                   f" | {best if best is not None else '-'} | "
-                   f"{pub if pub is not None else '-'} | {gap} |")
+                   f" | {best if best is not None else '-'} | {pubcell} | {gap} |")
     out.append("")
 
     counts = defaultdict(int)
@@ -86,6 +128,14 @@ def main() -> int:
             "- results per method: " + ", ".join(f"`{k}`={v}" for k, v in sorted(counts.items())),
             f"- dirty-tree results: **{sum(1 for r in rows if r.get('dirty'))}** "
             "(these must not be used for any published claim)", ""]
+
+    out += ["## AES MixColumns g-XOR record history", "",
+            "| gates | source | method |", "|---:|---|---|"]
+    for gates, src, method in AES_HISTORY:
+        out.append(f"| {gates} | {src} | {method} |")
+    out += ["", "Our search produces **g-XOR** programs. Where the best published "
+            "figure above is s-XOR, it is still the bar to beat: s-XOR programs are "
+            "valid g-XOR programs, so an s-XOR count is a g-XOR upper bound.", ""]
 
     (REPO / "RESULTS.md").write_text("\n".join(out))
     print("\n".join(out))

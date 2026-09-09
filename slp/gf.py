@@ -58,6 +58,19 @@ def circulant(first_row: Sequence[int]) -> list[list[int]]:
     return [[first_row[(j - i) % n] for j in range(n)] for i in range(n)]
 
 
+def circulant_right(first_row: Sequence[int]) -> list[list[int]]:
+    """Circulant in the *right-multiplication* convention: entry (i,j) = c[(i-j) mod n].
+
+    Some specifications (e.g. WHIRLPOOL) define the diffusion step as a row-vector
+    times a matrix, B = A*C with C[i][j] = c[(j-i) mod n]. Writing that as the
+    column-vector map y = M x gives M = C^T, which is this function. Using
+    `circulant` there would silently transpose the problem: M and M^T are
+    different linear maps with, in general, different circuit sizes.
+    """
+    n = len(first_row)
+    return [[first_row[(i - j) % n] for j in range(n)] for i in range(n)]
+
+
 def hadamard(coeffs: Sequence[int]) -> list[list[int]]:
     """had(a_0,...,a_{n-1}) with entry (i,j) = a_{i XOR j}. n must be a power of two."""
     n = len(coeffs)
