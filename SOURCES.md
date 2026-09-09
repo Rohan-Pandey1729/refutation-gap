@@ -211,6 +211,28 @@ of mathematics as a whole."*
 | 8.3 | ThetaEvolve (arXiv 2511.23473): new best-known bounds on circle packing (n=26, 2.63598308) and the first autocorrelation inequality (1.503133), using DeepSeek-R1-0528-Qwen3-8B on 8×A100 | VERIFIED |
 | 8.4 | Erdős database counts | **PARTIAL — sources conflict.** Best defensible: "over 1,100 catalogued problems, ~565 solved and ~650 open as of August 2026 (Quanta)." A live site fetch returned 617/171, which contradicts the site's own Aug-2025 retrospective of 1,135 and is treated as stale. |
 
+## 8b. Open anomaly: AES InvMixColumns
+
+Our exact-oracle Boyar-Peralta produces a **verified 121-gate** circuit for AES
+InvMixColumns. The value attributed to BP for that matrix in the verification
+pass was ~155 (Tan & Peyrin), which would make our result better by 34 gates.
+
+**This is recorded as an anomaly, not a claim.** Either reading is possible:
+
+- our BP genuinely does better on this instance (the matrix is dense -- 472 ones,
+  naive 440 -- so there is far more sharing available than in MixColumns); or
+- the ~155 figure is for a different matrix, orientation, or metric; the
+  verification pass explicitly flagged inconsistent extractions from that table.
+
+What *is* established: the InvMixColumns matrix here is correct
+(`inv(mix(x)) == x` verified on FIPS-197 vectors, `tests/test_aes.py`), the
+circuit passes the bitmask verifier, and it is 121 gates. The published
+comparison value is unverified.
+
+**Before this is mentioned anywhere: read Tan & Peyrin's table in the typeset
+journal PDF and confirm what matrix and metric the ~155 refers to.** Best known
+for this matrix remains 92 (s-XOR, Xiang et al.), which we are nowhere near.
+
 ## 9. Open items to re-check before submission
 
 1. Re-check ePrint for anything superseding 88 XOR on AES MixColumns.
@@ -219,3 +241,5 @@ of mathematics as a whole."*
 4. Confirm whether Yuan et al.'s 91 s-XOR MixColumns implies 91 for InvMixColumns
    (follows from metric inversion-invariance, but not stated in the source).
 5. Inspect OpenAI's Lean repo for `sorry` / custom axioms if item 7 is cited in print.
+6. Resolve the AES InvMixColumns anomaly in §8b against the typeset Tan-Peyrin table.
+7. Compile the generated Lean certificates and record the axiom lists.
