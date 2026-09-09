@@ -181,20 +181,25 @@ are:
    explains why, and the crossover argument for when it could pay.
 2. The observation that structured matrices are far easier for the exact oracle
    than random ones, and that random benchmarks therefore mislead.
-3. The first systematic measurement of the optimality gap of SLP heuristics.
-4. A trivial-but-first lower bound of 32 for AES MixColumns (32 distinct target
-   rows each need their own gate in a minimum program), against the best known
-   upper bound of 88. The gap is enormous and nobody has closed any of it.
+3. A systematic measurement of the optimality gap of SLP heuristics on random
+   GF(2) matrices at n=6–9 — reported as an interval, with the censoring
+   disclosed. Not a priority claim: the method is from 2010.
+4. A trivial lower bound of 32 for AES MixColumns (32 distinct target rows each
+   need their own gate in a minimum program), against the best known upper bound
+   of 88. It is worth stating only because we found no published lower bound at
+   all — but it carries no AES-specific information: the same counting argument
+   gives 32 for every 32×32 instance in the benchmark set.
 
 Suitable venue: an arXiv note or a workshop, not a top-tier conference. The
 negative results are the most valuable part and should lead, not be buried.
 
 ## What we did not do
 
-- Did not beat any record. Best portfolio results are ANUBIS 105 (published BP
-  106, best known 98 s-XOR), CLEFIA M1 110 (published BP 111, best known 103),
-  AES MixColumns 97 (best known 88). We are competitive with the 2017 BP baseline
-  and well short of 2019–2026 methods, which we have not implemented.
+- Did not beat any record. Best portfolio results are ANUBIS **105** (published
+  BP 106, best known 98 s-XOR), CLEFIA M1 **110** (published BP 111, best known
+  103 s-XOR), AES MixColumns **98** (our unrestricted BP reaches 97; best known
+  88). Competitive with the 2017 BP baseline, well short of 2019–2026 methods,
+  which we have not implemented.
 - Did not compile the Lean certificates (no toolchain in the working environment).
 - Did not implement the s-XOR metric, so several best-known values are not
   directly comparable to our output.

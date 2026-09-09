@@ -48,8 +48,9 @@ matrices two-thirds their size, so random benchmarks systematically mislead. And
 a prior-art check found that both fallback directions — SAT-based optimality and
 BP acceleration — are already published.
 
-What survives is an empirical contribution: the first systematic measurement of
-how far standard SLP heuristics sit above the true optimum. See
+What survives is an empirical contribution: a systematic measurement of how far
+standard SLP heuristics sit above the true optimum, on random GF(2) matrices at
+n=6–9. See
 **[docs/FINDINGS.md](docs/FINDINGS.md)** for the full account, and
 **[SOURCES.md](SOURCES.md) §6b–6c** for the prior art that constrains the claims.
 
@@ -79,14 +80,11 @@ Exact BP on random `n×n` density-0.5 instances:
 Calls grow ~220×; work *per call* grows ~320×. The oracle, not the outer loop,
 is what explodes.
 
-Budgeted-oracle frontier at n=20 — what a learned oracle must beat:
-
-| oracle node cap | gates | seconds |
-|---|---:|---:|
-| exact | 73 | 7.99 |
-| 1e4 | 75 | 5.39 |
-| 1e3 | 87 | 2.34 |
-| 1e2 | 95 | 0.73 |
+> **Provenance note.** An earlier version of this section carried a
+> budgeted-oracle table and a wall-time column that no file in `runs/` backs —
+> they came from an exploratory session before the logging harness existed. Both
+> have been removed rather than re-stated from memory. The columns above
+> (calls, nodes/call) are reproduced from `runs/crossover.jsonl`.
 
 ## Status: reproduction of published baselines
 
@@ -141,9 +139,13 @@ ceremony — it has already caught four real bugs, listed in
    exactly, and better.
 5. **Records** — not achieved. Competitive with the 2017 BP baseline, well short
    of 2019–2026 methods we have not implemented.
-6. **Optimality** — **55 instances closed by SAT.** Standard heuristics are exactly
-   optimal 69% of the time and never more than one gate above, at n=6..8. The
-   method is Fuhs & Schneider-Kamp (SAT 2010), not ours; the coverage is new.
+6. **Optimality** — **121 instances closed by SAT** out of 148 attempted. On the
+   closed set the heuristics are exactly optimal 83.5% of the time, but that
+   figure is censored: closability correlates with a small gap, and 11 of the 27
+   inconclusive instances are provably suboptimal. The defensible statement is
+   that the true rate lies between **68.2% and 79.1%**. Gaps are almost always
+   exactly one gate; one instance reached two. The method is Fuhs &
+   Schneider-Kamp (SAT 2010), not ours; the coverage is new.
 
 **The metric trap, for the record:** the oracle answers "no" ~96–98% of the time.
 On the upward split, the trained model scored 0.9738 accuracy against a
@@ -182,7 +184,7 @@ lean/certs/              generated certificates: `lean <file>` to check
 ## Quick start
 
 ```bash
-python3 -m pytest tests/ -q                    # 34 tests
+python3 -m pytest tests/ -q                    # 51 tests
 python3 scripts/run_baselines.py --suite tiny  # end-to-end
 python3 scripts/aggregate.py                   # regenerate RESULTS.md
 python3 scripts/recheck.py                     # re-verify everything recorded

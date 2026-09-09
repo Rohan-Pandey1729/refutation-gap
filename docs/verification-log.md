@@ -66,3 +66,40 @@ Re-check before any submission:
 4. Whether Yuan et al.'s 91 s-XOR for MixColumns implies 91 for InvMixColumns.
 5. Whether OpenAI's Lean repo contains `sorry`, custom axioms, or `native_decide`,
    if that work is cited in print.
+
+## 2026-09-09 — internal audit of the overnight run
+
+An adversarial audit was run against the night's write-up, checking every
+quantitative claim in `FINDINGS.md` and `README.md` against the raw data in
+`runs/`. It found substantive problems, all now corrected:
+
+| finding | correction |
+|---|---|
+| `aggregate_optimality.py` computed a dedup key and never used it, so any instance appearing in two sweeps was **counted twice**. 125 "closed" was really 104. | Dedup fixed; the script now also asserts that two runs never disagree on an optimum. Regenerated: 148 attempted, 121 closed, 21 duplicates collapsed. |
+| **The optimality-gap statistic was censored and the censoring undisclosed.** It was computed only over instances the solver could close, and closability correlates with a small gap. The published 80.8% lay *outside* the interval the full sample supports. | Censoring analysis added to the aggregator. Reported as an interval (68.2%–79.1%), with the 11 provably-suboptimal inconclusive instances counted. |
+| The headline "monotone degradation 93% → 70% → 56% from n=6 to n=8" was an artefact of the dedup bug. | Removed. With the bug fixed there is no resolvable trend (92% → 76% → 78%). |
+| README claimed 55 instances, 69%, and "never more than one gate above" — all stale, and the last falsified by an existing gap-2 instance. | Rewritten. |
+| Two README tables (a budgeted-oracle frontier and a wall-time column) had **no backing data in `runs/`** — they predated the logging harness. | Removed rather than re-stated from memory, with a provenance note. |
+| The "20× cheaper" figure spans 9×–29× across the project's own recordings; two model-inference measurements differ by 2.05× and only one was reported. | Restated as a range, with both measurements disclosed. |
+| `µs/call` is wall-time ÷ oracle-calls, making "the oracle is the whole runtime" true by construction. | Disclosed in the text. |
+| Two MDS "results" were one matrix (2×2 circulant and Hadamard coincide; identical fingerprint). | Corrected to a single closed case. |
+| An n=12 MDS timeout was claimed with no record in `runs/`. | Claim withdrawn. |
+| The density claim ("closes at 0.3–0.5, inconclusive at 0.7") was false — every density-0.5 n=9 instance also went inconclusive. | Corrected. |
+| Portfolio AES best stated as 97; the portfolio's best is 98 (97 is unrestricted BP). | Corrected. |
+| README said 34 tests; 51 collect. | Corrected. |
+
+**Known issues left open, deliberately:**
+
+- Every record in `runs/index.jsonl` carries `dirty: true`, violating this
+  project's own stated rule that dirty-tree results are not publishable. The
+  numbers are reproducible from the committed code, but the rule was not followed
+  and the reproduction figures in README technically fall under it.
+- `docs/experiment-log.md` claims to record *every* command; several early runs
+  (the first optimality sweep, the top-K table, the portfolio, the MDS run)
+  predate or bypassed `scripts/logged.py` and are absent.
+- **The UNSAT side is unverified.** All three verification layers check circuits,
+  i.e. upper bounds. No DRAT proof is emitted or checked for any UNSAT answer, so
+  every lower bound rests on trusting CaDiCaL plus the symmetry-breaking argument
+  in `slp/optimal.py`'s docstring. The only independent cross-check is a
+  brute-force test at n=4 with ≤6 gates, well below the n=6–9 range where results
+  are claimed. **This is the most important gap in the project.**
