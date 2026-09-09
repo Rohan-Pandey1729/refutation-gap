@@ -165,14 +165,19 @@ heuristic found?":
 | rand n=9 s1 | 9 | 17 | 16 | **SAT** | 9.4 s | 98,619 |
 | rand n=10 s0 | 9 | 19 | 18 | **TIMEOUT** (8M conflicts) | 1,863.2 s | 152,377 |
 | rand n=10 s1 | 10 | 20 | 19 | **SAT** | 314.3 s | 170,191 |
+| rand n=11 s0 | 11 | 24 | 23 | **TIMEOUT** (8M conflicts) | 1,766.0 s | 301,084 |
 
 Two observations.
 
 **The wall has moved, but not far.** Sixteen years of solver progress moves the
-frontier from roughly n=8 to roughly n=9–10 on this problem. At n=10 the
-behaviour is already erratic: one instance settles in 314 s, its sibling exhausts
-an 8M-conflict budget after half an hour. This is a genuinely hard encoding, and
-incremental solver improvement is not going to reach the n=32 cipher matrices.
+frontier from roughly n=8 to roughly n=9–10 on this problem. n=9 settles in ~10 s;
+n=10 is erratic (one instance in 314 s, its sibling exhausting an 8M-conflict
+budget after half an hour); n=11 did not settle at all. This is a genuinely hard
+encoding, and incremental solver improvement is not going to reach the n=32
+cipher matrices — a different idea is needed, not a faster solver.
+
+Density matters as much as size: the broad sweep closes n=9 instances at density
+0.3–0.5 but goes inconclusive at density 0.7.
 
 **Every SAT call here returned SAT, not UNSAT.** At n=9 and n=10 the best of
 Paar1/Paar2/BP/RNBP over hundreds of restarts was *never* optimal — the solver

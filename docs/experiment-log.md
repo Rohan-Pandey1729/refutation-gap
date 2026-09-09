@@ -566,3 +566,79 @@ for name, b in sorted(best.items()):
   anubis                105 gates  bitmask=OK  symbolic=unsat (proved) (0.42s)  -> lean/certs/anubis_best_105.lean
   clefia_m1             110 gates  bitmask=OK  symbolic=unsat (proved) (0.70s)  -> lean/certs/clefia_m1_best_110.lean
 ```
+
+## 20260909T070104-prove_optimal_broad-c57b3f
+
+Broader lower-bound sweep at a tighter conflict budget (2M conflicts): coverage across many instances is worth more than one very hard proof. Sizes 6-9, three densities, five seeds. No published lower bound exists for the SLP problem on any benchmark, so every closed case here is new.
+
+- commit: `e317956` **(dirty tree)**
+- exit code: `0`  |  wall time: 5224.6s
+- full output: `runs/logs/20260909T070104-prove_optimal_broad-c57b3f.txt`
+
+```
+$ python3 scripts/prove_optimal.py --sizes 6 7 8 9 --densities 0.3 0.5 0.7 --seeds 0 1 2 3 4 --conf-budget 2000000 --restarts 300 --out runs/optimal_broad.jsonl --name prove_optimal_broad
+instance                    naive  heur    via   OPT  gap       sec
+rand_n6_m6_d0.3_s0             10     8  paar1     8   +0      0.51
+rand_n6_m6_d0.3_s1              6     5  paar1     5   +0      0.00
+rand_n6_m6_d0.3_s2              7     6  paar1     6   +0      0.02
+rand_n6_m6_d0.3_s3              5     4  paar1     4   +0      0.01
+rand_n6_m6_d0.3_s4              7     4  paar1     4   +0      0.01
+rand_n6_m6_d0.5_s0             17     9  paar1     9   +0      0.83
+rand_n6_m6_d0.5_s1             15     7     bp     7   +0      0.01
+rand_n6_m6_d0.5_s2             18     8  paar1     8   +0      0.02
+rand_n6_m6_d0.5_s3             14    10  paar2     9   +1      1.60
+rand_n6_m6_d0.5_s4             15     8     bp     8   +0      0.10
+rand_n6_m6_d0.7_s0             18     9     bp     9   +0      0.25
+rand_n6_m6_d0.7_s1             24     6  paar1     6   +0      0.01
+rand_n6_m6_d0.7_s2             15     8  paar1     8   +0      0.69
+rand_n6_m6_d0.7_s3             16     8   rnbp     8   +0      0.31
+rand_n6_m6_d0.7_s4             19     9     bp     9   +0      0.20
+rand_n7_m7_d0.3_s0              7     6  paar1     6   +0      0.01
+rand_n7_m7_d0.3_s1              4     4  paar1     4   +0      0.00
+rand_n7_m7_d0.3_s2             10     8  paar1     8   +0      0.35
+rand_n7_m7_d0.3_s3             11     7  paar2     7   +0      0.03
+rand_n7_m7_d0.3_s4             13     8  paar1     8   +0      0.57
+rand_n7_m7_d0.5_s0             22    11  paar1    10   +1      3.28
+rand_n7_m7_d0.5_s1             22    11     bp    10   +1      6.93
+rand_n7_m7_d0.5_s2             19    12  paar1    11   +1     45.92
+rand_n7_m7_d0.5_s3             13     9  paar2     9   +0      3.23
+rand_n7_m7_d0.5_s4             14     8   rnbp     8   +0      0.49
+rand_n7_m7_d0.7_s0             27    12  paar2    11   +1      7.05
+rand_n7_m7_d0.7_s1             29    10   rnbp     9   +1      0.18
+rand_n7_m7_d0.7_s2             27    11     bp    10   +1      3.68
+rand_n7_m7_d0.7_s3             30    10     bp     9   +1      0.31
+rand_n7_m7_d0.7_s4             19    11     bp    10   +1      8.01
+rand_n8_m8_d0.3_s0             14    11  paar1    10   +1     14.29
+rand_n8_m8_d0.3_s1             13    10     bp    10   +0     15.49
+rand_n8_m8_d0.3_s2             12     9  paar1     9   +0      2.67
+rand_n8_m8_d0.3_s3             18    12  paar1     ?         176.48  inconclusive at k=11
+rand_n8_m8_d0.3_s4             10     9  paar1     9   +0      2.77
+rand_n8_m8_d0.5_s0             28    14   rnbp     ?         289.28  inconclusive at k=13
+rand_n8_m8_d0.5_s1             21    12  paar2     ?         258.97  inconclusive at k=11
+rand_n8_m8_d0.5_s2             20    15  paar2     ?         281.09  inconclusive at k=13
+rand_n8_m8_d0.5_s3             22    11     bp     ?         196.86  inconclusive at k=10
+rand_n8_m8_d0.5_s4             27    13     bp     ?         169.79  inconclusive at k=12
+rand_n8_m8_d0.7_s0             34    14     bp     ?         196.98  inconclusive at k=12
+rand_n8_m8_d0.7_s1             35    13     bp     ?         186.24  inconclusive at k=12
+rand_n8_m8_d0.7_s2             39    14     bp    13   +1     80.78
+rand_n8_m8_d0.7_s3             31    15  paar1     ?         207.76  inconclusive at k=12
+rand_n8_m8_d0.7_s4             41    14  paar2    12   +2     19.14
+rand_n9_m9_d0.3_s0             17    12  paar1     ?         152.46  inconclusive at k=11
+rand_n9_m9_d0.3_s1             16    11     bp    11   +0     78.75
+rand_n9_m9_d0.3_s2             17    12     bp     ?         139.10  inconclusive at k=11
+rand_n9_m9_d0.3_s3             17    13     bp     ?         151.43  inconclusive at k=12
+rand_n9_m9_d0.3_s4             15    10  paar2    10   +0     11.18
+rand_n9_m9_d0.5_s0             26    14  paar1     ?         165.98  inconclusive at k=12
+rand_n9_m9_d0.5_s1             38    16     bp     ?         238.73  inconclusive at k=15
+rand_n9_m9_d0.5_s2             28    18  paar1     ?         311.58  inconclusive at k=16
+rand_n9_m9_d0.5_s3             39    18     bp     ?         303.81  inconclusive at k=16
+rand_n9_m9_d0.5_s4             32    17     bp     ?         225.30  inconclusive at k=14
+rand_n9_m9_d0.7_s0             48    18     bp     ?         268.52  inconclusive at k=17
+rand_n9_m9_d0.7_s1             45    17     bp     ?         178.50  inconclusive at k=15
+rand_n9_m9_d0.7_s2             49    16     bp     ?         257.78  inconclusive at k=14
+rand_n9_m9_d0.7_s3             45    18     bp     ?         258.14  inconclusive at k=17
+rand_n9_m9_d0.7_s4             49    18   rnbp     ?         295.26  inconclusive at k=16
+[run] wrote runs/20260909T070104-prove_optimal_broad-44112f.json  (38 results)
+
+proved optimal: 38   inconclusive: 22
+```
