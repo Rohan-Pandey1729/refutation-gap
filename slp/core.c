@@ -54,35 +54,33 @@ static inline int rnd_below(int k) { return (int)(xorshift() % (u64)k); }
  * Repeatedly pick the pair of signals co-occurring in the most rows.
  * mode 0 = Paar1 (first max wins), mode 1 = Paar2 (uniform random among maxima).
  * ===================================================================== */
-#define RW 4                      /* 4 * 64 = 256 signal slots per row bitset */
-static inline int bs_get(const u64 *r, int i) { return (r[i >> 6] >> (i & 63)) & 1ULL; }
-static inline void bs_set(u64 *r, int i) { r[i >> 6] |= 1ULL << (i & 63); }
-static inline void bs_clr(u64 *r, int i) { r[i >> 6] &= ~(1ULL << (i & 63)); }
-static inline int bs_pc(const u64 *r) {
-    int s = 0; for (int w = 0; w < RW; w++) s += pc(r[w]); return s;
-}
-
+/* Paar's greedy algorithm.
+ *
+ * colrows[s] is a bitmask over output rows: bit r set iff row r currently
+ * contains signal s. Co-occurrence of a signal pair is then a single
+ * popcount of an AND, so each greedy step is O(ns^2) rather than O(ns^2 * m).
+ * Requires m <= 64 rows.
+ */
 int slp_paar(int n, int m, const u64 *targets, int mode, int *prog_out, int prog_cap) {
     clock_t t0 = clock();
     static u64 sig[MAXSIG];
-    static u64 row[MAXTGT][RW];
+    static u64 colrows[MAXSIG];
     int ns = n, nops = 0;
-    const int SIGCAP = RW * 64;
 
-    if (n > 64 || m > MAXTGT) return -1;
-    for (int i = 0; i < n; i++) sig[i] = 1ULL << i;
-    memset(row, 0, sizeof(u64) * MAXTGT * RW);
-    for (int r = 0; r < m; r++)
-        for (int i = 0; i < n; i++)
-            if (targets[r] >> i & 1) bs_set(row[r], i);
+    if (n > 64 || m > 64) return -1;
+    for (int i = 0; i < n; i++) {
+        sig[i] = 1ULL << i;
+        u64 rows = 0;
+        for (int r = 0; r < m; r++) if (targets[r] >> i & 1) rows |= 1ULL << r;
+        colrows[i] = rows;
+    }
 
-    while (ns < SIGCAP) {
+    while (ns < MAXSIG) {
         int besti = -1, bestj = -1, bestc = 1, ties = 0;
         for (int i = 0; i < ns; i++) {
+            if (pc(colrows[i]) < 2) continue;      /* cannot be in a pair of >=2 rows */
             for (int j = i + 1; j < ns; j++) {
-                int c = 0;
-                for (int r = 0; r < m; r++)
-                    if (bs_get(row[r], i) && bs_get(row[r], j)) c++;
+                int c = pc(colrows[i] & colrows[j]);
                 if (c > bestc) { bestc = c; besti = i; bestj = j; ties = 1; }
                 else if (c == bestc && c > 1) {
                     ties++;
@@ -94,24 +92,29 @@ int slp_paar(int n, int m, const u64 *targets, int mode, int *prog_out, int prog
         if (nops * 2 + 1 >= prog_cap) return -1;
         prog_out[2 * nops] = besti; prog_out[2 * nops + 1] = bestj; nops++;
         sig[ns] = sig[besti] ^ sig[bestj];
-        for (int r = 0; r < m; r++)
-            if (bs_get(row[r], besti) && bs_get(row[r], bestj)) {
-                bs_clr(row[r], besti); bs_clr(row[r], bestj); bs_set(row[r], ns);
-            }
+        u64 shared = colrows[besti] & colrows[bestj];
+        colrows[besti] &= ~shared;
+        colrows[bestj] &= ~shared;
+        colrows[ns] = shared;
         ns++;
     }
 
+    /* finish each row by chaining its remaining signals.
+     * ns_end is fixed before the loop: signals created *here* must not be
+     * rescanned as if they were still pending row members. */
+    const int ns_end = ns;
     for (int r = 0; r < m; r++) {
-        int idx[MAXSIG], k = 0;
-        for (int s = 0; s < ns && k < MAXSIG; s++) if (bs_get(row[r], s)) idx[k++] = s;
-        if (k == 0) return -1;
-        int acc = idx[0];
-        for (int q = 1; q < k; q++) {
+        int acc = -1;
+        for (int s = 0; s < ns_end; s++) {
+            if (!(colrows[s] >> r & 1)) continue;
+            if (acc < 0) { acc = s; continue; }
             if (nops * 2 + 1 >= prog_cap || ns >= MAXSIG) return -1;
-            prog_out[2 * nops] = acc; prog_out[2 * nops + 1] = idx[q]; nops++;
-            sig[ns] = sig[acc] ^ sig[idx[q]];
+            prog_out[2 * nops] = acc; prog_out[2 * nops + 1] = s; nops++;
+            sig[ns] = sig[acc] ^ sig[s];
+            colrows[ns] = 0;
             acc = ns; ns++;
         }
+        if (acc < 0) return -1;                    /* zero row */
     }
     g_stats.seconds += (double)(clock() - t0) / CLOCKS_PER_SEC;
     return nops;
