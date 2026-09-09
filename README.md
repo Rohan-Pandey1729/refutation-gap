@@ -34,7 +34,26 @@ is any **method**: no algorithm, no search procedure, no reproducibility, no
 evaluation beyond one matrix. The defensible contribution is the first
 systematic, published, reproducible methodology for learned search on SLP.
 
-## Thesis
+## Status of the central thesis: REFUTED, and the refutation is the result
+
+The project set out to replace BP's NP-hard distance oracle with a learned
+estimator. **Measurement killed it.** The exact oracle costs 2–3 µs/call on the
+cipher matrices; the learned model costs 59.6 µs/query — 20× more. The oracle
+really is where BP's time goes, but it is far too cheap per call to be worth
+learning at this scale.
+
+Two further findings came out of that, and both are more useful than the original
+plan. Structured cipher matrices are ~4× *easier* per oracle call than random
+matrices two-thirds their size, so random benchmarks systematically mislead. And
+a prior-art check found that both fallback directions — SAT-based optimality and
+BP acceleration — are already published.
+
+What survives is an empirical contribution: the first systematic measurement of
+how far standard SLP heuristics sit above the true optimum. See
+**[docs/FINDINGS.md](docs/FINDINGS.md)** for the full account, and
+**[SOURCES.md](SOURCES.md) §6b–6c** for the prior art that constrains the claims.
+
+## Original thesis (kept for the record)
 
 Boyar–Peralta and its descendants are greedy searches wrapped around an **exact
 distance oracle** `g(x)` = fewest currently-available signals XORing to `x`.
@@ -110,25 +129,27 @@ negative control: a deliberately corrupted circuit must be rejected. This is not
 ceremony — it has already caught four real bugs, listed in
 [`docs/verification-log.md`](docs/verification-log.md).
 
-## Plan
+## Where the work actually got to
 
-1. **Baselines and reproduction** — done, six exact matches
-2. **Profile the oracle** — done
-3. **Learned oracle** — data pipeline done (labels are free: the exact oracle BP
-   already runs produces them; ~1.1M labelled queries from one pass over the
-   small suite). Model next.
-4. **Wide beam/MCTS search** using the cheap oracle
-5. **Records** — target the parametric MDS families and less-attacked matrices
-   first, *not* AES MixColumns, which is the most optimised instance in the field
-6. **Optimality** via SAT/ILP lower bounds on small GF(2⁴) instances, to *close*
-   cases rather than only improve upper bounds. No published lower bound exists
-   for any of these matrices — this is the part nobody in the current
-   AI-for-mathematics wave is doing.
+1. **Baselines and reproduction** — done. Six exact matches against published values.
+2. **Profile the oracle** — done. It is the bottleneck, and it is cheap per call.
+3. **Learned oracle** — done and **refuted on cost**. Trains well (AP 0.845 vs
+   0.021 chance on unseen larger instances) but costs 20× more than the oracle it
+   replaces. Generalises downward, not upward.
+4. **Candidate prefilter** — works, and doubles as a diversifier (ANUBIS 108 → 106
+   → 105 under a portfolio). **Prior art**: Sun-Yang-Li ePrint 2025/1493 does it
+   exactly, and better.
+5. **Records** — not achieved. Competitive with the 2017 BP baseline, well short
+   of 2019–2026 methods we have not implemented.
+6. **Optimality** — **55 instances closed by SAT.** Standard heuristics are exactly
+   optimal 69% of the time and never more than one gate above, at n=6..8. The
+   method is Fuhs & Schneider-Kamp (SAT 2010), not ours; the coverage is new.
 
-**Design constraint for step 3:** the oracle's answer is "no" ~96% of the time.
-A classifier that always says "no" scores 96% accuracy and is worthless. The
-metric is recall on positives at fixed inference budget — a missed positive costs
-one extra gate, a false positive is caught by the verifier.
+**The metric trap, for the record:** the oracle answers "no" ~96–98% of the time.
+On the upward split, the trained model scored 0.9738 accuracy against a
+constant-"no" baseline of 0.9787 — worse than answering "no" every time, while
+having genuinely learned something (40× lift in average precision). Reporting
+accuracy would have inverted the conclusion.
 
 ## Layout
 

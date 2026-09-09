@@ -9,8 +9,8 @@ coverage: exact g-XOR optima for *random* GF(2) matrices, which the
 existing exact work (cipher-derived submatrices, or the s-XOR metric on
 hand-picked instances) does not cover. See SOURCES.md section 6b.
 
-- instances closed: **55**
-- inconclusive (conflict budget exhausted): **5**
+- instances closed: **56**
+- inconclusive (conflict budget exhausted): **8**
 
 ## How far are the standard heuristics from optimal?
 
@@ -20,10 +20,10 @@ proven optimum.
 
 | gap (gates above optimum) | instances | share |
 |---:|---:|---:|
-| 0 | 38 | 69.1% |
-| 1 | 17 | 30.9% |
+| 0 | 38 | 67.9% |
+| 1 | 18 | 32.1% |
 
-Mean gap: **0.31 gates**. The heuristics are exactly optimal on **38/55** of the instances closed here (69%), and never worse than 1 gate(s) above optimum at these sizes.
+Mean gap: **0.32 gates**. The heuristics are exactly optimal on **38/56** of the instances closed here (68%), and never worse than 1 gate(s) above optimum at these sizes.
 
 ## By instance size
 
@@ -31,7 +31,7 @@ Mean gap: **0.31 gates**. The heuristics are exactly optimal on **38/55** of the
 |---:|---:|---:|---:|---:|
 | 6 | 24 | 23/24 | 0.04 | 0.3 s |
 | 7 | 24 | 10/24 | 0.58 | 5.2 s |
-| 8 | 7 | 5/7 | 0.29 | 8.5 s |
+| 8 | 8 | 5/8 | 0.38 | 17.5 s |
 
 ## Full results
 
@@ -92,6 +92,7 @@ Mean gap: **0.31 gates**. The heuristics are exactly optimal on **38/55** of the
 | rand_n8_m8_d0.3_s2 | 12 | 9 | paar1 | **9** | +0 | 1.8 s |
 | rand_n8_m8_d0.3_s2 | 12 | 9 | paar1 | **9** | +0 | 2.7 s |
 | rand_n8_m8_d0.3_s4 | 10 | 9 | paar1 | **9** | +0 | 2.8 s |
+| rand_n8_m8_d0.7_s2 | 39 | 14 | bp | **13** | +1 | 80.8 s |
 
 ## Inconclusive
 
@@ -101,7 +102,10 @@ nothing and are recorded only for completeness.
 | instance | naive | heuristic | stalled at k |
 |---|---:|---:|---:|
 | rand_n8_m8_d0.5_s0 | 28 | 14 | 13 |
+| rand_n8_m8_d0.7_s0 | 34 | 14 | 12 |
 | rand_n8_m8_d0.5_s1 | 21 | 12 | 11 |
+| rand_n8_m8_d0.7_s1 | 35 | 13 | 12 |
 | rand_n8_m8_d0.5_s2 | 20 | 15 | 13 |
 | rand_n8_m8_d0.3_s3 | 18 | 12 | 11 |
 | rand_n8_m8_d0.5_s3 | 22 | 11 | 10 |
+| rand_n8_m8_d0.5_s4 | 27 | 13 | 12 |
