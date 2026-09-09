@@ -3,3 +3,4 @@ __pycache__/
 slp/libslp.so
 runs/logs/
 data/
+tools/drat-trim/
