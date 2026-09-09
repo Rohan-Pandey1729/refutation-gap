@@ -87,9 +87,17 @@ end: field arithmetic -> binary expansion -> search -> verification.
    verifier in Python; matching published numbers on AES MixColumns.
 2. **Profile and characterise the oracle.** *(done for random instances)*
    Establish the quality/compute frontier of the budgeted oracle.
-3. **Learned oracle.** Train a network to predict `g(x)` given the current
-   signal set. Training data is free and exactly labelled: run the exact oracle
-   during baseline search and log every query. Supervised, no RL needed for v1.
+3. **Learned oracle.** *(data pipeline done)* Train a network to answer
+   `g(x) <= b?` given the current signal set. Training data is free and exactly
+   labelled: the exact oracle that BP already runs produces the labels, so every
+   baseline run doubles as data collection (`scripts/collect_oracle_data.py`).
+   A single pass over the `tiny` suite yields ~1.1M labelled queries in seconds.
+
+   One property to design around: **the answer is "no" about 96% of the time.**
+   A classifier that always predicts "no" scores 96% accuracy and is worthless.
+   The metric that matters is recall on the positive class at a fixed inference
+   budget, since a missed positive costs exactly one extra gate in the outer
+   search and a false positive is caught by the verifier.
 4. **Wide search with the cheap oracle.** Beam search / MCTS over the same
    action space, using the learned oracle where BP used the exact one. This is
    where the CircuitBuilder machinery transfers directly.

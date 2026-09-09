@@ -111,6 +111,8 @@ class Run:
                     "run_id": self.run_id,
                     "instance": r.instance,
                     "fingerprint": r.fingerprint,
+                    "n_inputs": r.n_inputs,
+                    "n_outputs": r.n_outputs,
                     "method": r.method,
                     "config": r.config,
                     "gates": r.gates,

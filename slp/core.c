@@ -37,6 +37,35 @@ void slp_get_stats(double *out) {
 
 static inline int pc(u64 x) { return __builtin_popcountll(x); }
 
+/* ---------------- oracle query log ----------------
+ * Supervised training data for a learned distance oracle. Each record is
+ *   (step, x, budget, label)
+ * where `step` indexes the emitted program prefix (the added-set A at the time
+ * of the query is exactly the first `step` ops of the program), and
+ *   label = 1  iff  g(x) <= budget   under that A,
+ *   label = 0  iff  g(x) >  budget,
+ *   label = -1 iff  the exact search hit its node cap (unlabelled).
+ * Reconstructing A from the program prefix keeps records tiny and exact.
+ */
+static long long *g_log = 0;
+static long long  g_log_cap = 0, g_log_len = 0;
+static int        g_log_step = 0;
+
+void slp_log_begin(long long *buf, long long cap) {
+    g_log = buf; g_log_cap = cap; g_log_len = 0; g_log_step = 0;
+}
+long long slp_log_len(void) { return g_log_len; }
+void slp_log_end(void) { g_log = 0; g_log_cap = 0; }
+
+static inline void log_query(u64 x, int budget, int label) {
+    if (!g_log || g_log_len + 4 > g_log_cap) return;
+    g_log[g_log_len++] = g_log_step;
+    g_log[g_log_len++] = (long long)x;
+    g_log[g_log_len++] = budget;
+    g_log[g_log_len++] = label;
+}
+
+
 /* ---------------- rng ---------------- */
 static u64 rng_state = 88172645463325252ULL;
 void slp_seed(u64 s) { rng_state = s ? s : 88172645463325252ULL; }
@@ -158,7 +187,9 @@ static int reach(Oracle *o, u64 x, int budget) {
     g_stats.oracle_calls++;
     if (budget < 0) return 0;
     o->nodes = 0;
-    return reach_dfs(o, x, budget, 0);
+    int r = reach_dfs(o, x, budget, 0);
+    log_query(x, budget, r);
+    return r;
 }
 
 /* mode 0 = deterministic BP, mode 1 = RNBP (random tie-break)
@@ -234,6 +265,7 @@ int slp_bp(int n, int m, const u64 *targets, int mode, long long node_cap,
         u64 u = S[besti] ^ S[bestj];
         S[ns++] = u;
         o.A[o.na++] = u;
+        g_log_step = nops;                 /* A == first `nops` ops of the program */
         if (pc(u) > o.maxpc) o.maxpc = pc(u);
         if (ns >= MAXSIG) return -1;
 

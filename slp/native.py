@@ -36,6 +36,9 @@ def _load() -> ctypes.CDLL:
                              ctypes.c_int, ctypes.c_longlong]
     lib.slp_gval.restype = ctypes.c_int
     lib.slp_seed.argtypes = [ctypes.c_uint64]
+    lib.slp_log_begin.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
+    lib.slp_log_len.restype = ctypes.c_longlong
+    lib.slp_log_end.argtypes = []
     lib.slp_reset_stats.argtypes = []
     lib.slp_get_stats.argtypes = [ctypes.POINTER(ctypes.c_double)]
     return lib
@@ -97,3 +100,23 @@ def gval(n_inputs: int, x: int, added, ub: int, node_cap: int = 0) -> int:
     arr = (ctypes.c_uint64 * max(1, len(added)))(*(added or [0]))
     return LIB.slp_gval(n_inputs, ctypes.c_uint64(x), arr, len(added), ub,
                         ctypes.c_longlong(node_cap))
+
+
+def boyar_peralta_logged(n_inputs: int, targets, mode: int = 0, node_cap: int = 0,
+                         log_cap: int = 40_000_000):
+    """Run BP while logging every distance-oracle query.
+
+    Returns (program, records) where records is a list of
+    (step, x, budget, label) tuples. `step` is the length of the program prefix
+    that defines the added-set at query time, so the search state for any record
+    is exactly `program[:step]`. label is 1 / 0 / -1 (reachable / not / capped).
+    """
+    buf = (ctypes.c_longlong * log_cap)()
+    LIB.slp_log_begin(buf, log_cap)
+    try:
+        prog = boyar_peralta(n_inputs, targets, mode, node_cap)
+        n = LIB.slp_log_len()
+    finally:
+        LIB.slp_log_end()
+    records = [(buf[i], buf[i + 1], buf[i + 2], buf[i + 3]) for i in range(0, n, 4)]
+    return prog, records
