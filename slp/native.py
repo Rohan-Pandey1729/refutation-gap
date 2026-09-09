@@ -32,6 +32,9 @@ def _load() -> ctypes.CDLL:
     lib.slp_bp.argtypes = [ctypes.c_int, ctypes.c_int, u64p, ctypes.c_int,
                            ctypes.c_longlong, intp, ctypes.c_int]
     lib.slp_bp.restype = ctypes.c_int
+    lib.slp_bp_topk.argtypes = [ctypes.c_int, ctypes.c_int, u64p, ctypes.c_int,
+                                ctypes.c_longlong, ctypes.c_int, intp, ctypes.c_int]
+    lib.slp_bp_topk.restype = ctypes.c_int
     lib.slp_gval.argtypes = [ctypes.c_int, ctypes.c_uint64, u64p, ctypes.c_int,
                              ctypes.c_int, ctypes.c_longlong]
     lib.slp_gval.restype = ctypes.c_int
@@ -39,6 +42,9 @@ def _load() -> ctypes.CDLL:
     lib.slp_log_begin.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
     lib.slp_log_len.restype = ctypes.c_longlong
     lib.slp_log_end.argtypes = []
+    lib.slp_clog_begin.argtypes = [ctypes.POINTER(ctypes.c_longlong), ctypes.c_longlong]
+    lib.slp_clog_len.restype = ctypes.c_longlong
+    lib.slp_clog_end.argtypes = []
     lib.slp_reset_stats.argtypes = []
     lib.slp_get_stats.argtypes = [ctypes.POINTER(ctypes.c_double)]
     return lib
@@ -96,6 +102,17 @@ def boyar_peralta(n_inputs: int, targets, mode: int = 0, node_cap: int = 0):
     return _to_pairs(buf, nops)
 
 
+def boyar_peralta_topk(n_inputs: int, targets, mode: int = 0, node_cap: int = 0,
+                       topk: int = 100):
+    """BP restricted each step to the ~topk candidates surviving the free prefilter."""
+    buf = _prog_buffer()
+    nops = LIB.slp_bp_topk(n_inputs, len(targets), _targets_array(targets), mode,
+                           ctypes.c_longlong(node_cap), topk, buf, 2 * PROG_CAP)
+    if nops < 0:
+        raise RuntimeError("slp_bp_topk failed")
+    return _to_pairs(buf, nops)
+
+
 def gval(n_inputs: int, x: int, added, ub: int, node_cap: int = 0) -> int:
     arr = (ctypes.c_uint64 * max(1, len(added)))(*(added or [0]))
     return LIB.slp_gval(n_inputs, ctypes.c_uint64(x), arr, len(added), ub,
@@ -120,3 +137,22 @@ def boyar_peralta_logged(n_inputs: int, targets, mode: int = 0, node_cap: int = 
         LIB.slp_log_end()
     records = [(buf[i], buf[i + 1], buf[i + 2], buf[i + 3]) for i in range(0, n, 4)]
     return prog, records
+
+
+def boyar_peralta_candidates(n_inputs: int, targets, mode: int = 0, node_cap: int = 0,
+                             log_cap: int = 60_000_000):
+    """Run BP while logging every scored CANDIDATE pair.
+
+    Returns (program, records) where each record is (step, u, total, base):
+    at that step, adding signal u would leave the summed target distance at
+    `total`, against `base` before any addition. The step's chosen candidate is
+    the one minimising `total`.
+    """
+    buf = (ctypes.c_longlong * log_cap)()
+    LIB.slp_clog_begin(buf, log_cap)
+    try:
+        prog = boyar_peralta(n_inputs, targets, mode, node_cap)
+        n = LIB.slp_clog_len()
+    finally:
+        LIB.slp_clog_end()
+    return prog, [(buf[i], buf[i+1], buf[i+2], buf[i+3]) for i in range(0, n, 4)]

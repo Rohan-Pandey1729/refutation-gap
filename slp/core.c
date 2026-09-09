@@ -57,6 +57,32 @@ void slp_log_begin(long long *buf, long long cap) {
 long long slp_log_len(void) { return g_log_len; }
 void slp_log_end(void) { g_log = 0; g_log_cap = 0; }
 
+/* ---------------- candidate log ----------------
+ * For the candidate-ranking experiment. Each record is
+ *   (step, u, total, base)
+ * where at this step the search considered candidate signal u, adding it would
+ * leave the summed target distance at `total`, and `base` is the summed distance
+ * before adding anything. reduction = base - total. The best candidate at a step
+ * is the one minimising `total`; a ranker is judged by whether it puts that
+ * candidate in its top K.
+ */
+static long long *g_clog = 0;
+static long long  g_clog_cap = 0, g_clog_len = 0;
+
+void slp_clog_begin(long long *buf, long long cap) {
+    g_clog = buf; g_clog_cap = cap; g_clog_len = 0;
+}
+long long slp_clog_len(void) { return g_clog_len; }
+void slp_clog_end(void) { g_clog = 0; g_clog_cap = 0; }
+
+static inline void log_cand(int step, u64 u, int total, int base) {
+    if (!g_clog || g_clog_len + 4 > g_clog_cap) return;
+    g_clog[g_clog_len++] = step;
+    g_clog[g_clog_len++] = (long long)u;
+    g_clog[g_clog_len++] = total;
+    g_clog[g_clog_len++] = base;
+}
+
 static inline void log_query(u64 x, int budget, int label) {
     if (!g_log || g_log_len + 4 > g_log_cap) return;
     g_log[g_log_len++] = g_log_step;
@@ -196,8 +222,24 @@ static int reach(Oracle *o, u64 x, int budget) {
  * node_cap <= 0 : exact oracle.  node_cap > 0 : budgeted (approximate) oracle;
  *                 an exhausted search is treated as "no reduction found".
  */
+/* topk > 0 restricts each step's exact oracle evaluation to the topk candidates
+ * ranked by a free sufficient condition: since g(x) <= popcount(x), a candidate u
+ * is GUARANTEED to reduce target t's distance when popcount(t ^ u) <= dist[t]-1.
+ * Counting those targets costs O(#targets) popcounts per candidate, against
+ * O(#targets) exact-oracle DFS calls -- three orders of magnitude cheaper.
+ * The filter is one-sided: it can miss reductions that need added signals
+ * (where g(t^u) < popcount(t^u)), so quality can degrade. It never produces an
+ * incorrect circuit; the verifier is downstream regardless. */
+int slp_bp_topk(int n, int m, const u64 *targets, int mode, long long node_cap,
+                int topk, int *prog_out, int prog_cap);
+
 int slp_bp(int n, int m, const u64 *targets, int mode, long long node_cap,
            int *prog_out, int prog_cap) {
+    return slp_bp_topk(n, m, targets, mode, node_cap, 0, prog_out, prog_cap);
+}
+
+int slp_bp_topk(int n, int m, const u64 *targets, int mode, long long node_cap,
+                int topk, int *prog_out, int prog_cap) {
     clock_t t0 = clock();
     u64 S[MAXSIG];
     int dist[MAXTGT];
@@ -226,6 +268,32 @@ int slp_bp(int n, int m, const u64 *targets, int mode, long long node_cap,
         int besti = -1, bestj = -1, best_total = 1 << 30;
         long long best_norm = -1;
         int ties = 0;
+        int base_total = 0;
+        for (int r = 0; r < mm; r++) base_total += dist[r];
+
+        /* Choose a score cutoff so that roughly `topk` candidates survive.
+         * A histogram over the cheap score avoids sorting the candidate list. */
+        int cheap_cut = 0;
+        if (topk > 0) {
+            int hist[MAXTGT + 2];
+            memset(hist, 0, sizeof(int) * (mm + 2));
+            for (int i = 0; i < ns; i++) {
+                for (int j = i + 1; j < ns; j++) {
+                    u64 u = S[i] ^ S[j];
+                    if (u == 0) continue;
+                    int cheap = 0;
+                    for (int r = 0; r < mm; r++)
+                        if (dist[r] > 0 && pc(tg[r] ^ u) <= dist[r] - 1) cheap++;
+                    hist[cheap]++;
+                }
+            }
+            int acc = 0;
+            cheap_cut = 0;
+            for (int v = mm; v >= 0; v--) {
+                acc += hist[v];
+                if (acc >= topk) { cheap_cut = v; break; }
+            }
+        }
 
         for (int i = 0; i < ns; i++) {
             for (int j = i + 1; j < ns; j++) {
@@ -235,6 +303,12 @@ int slp_bp(int n, int m, const u64 *targets, int mode, long long node_cap,
                 for (int q = 0; q < ns; q++) if (S[q] == u) { seen = 1; break; }
                 if (seen) continue;
 
+                if (topk > 0) {
+                    int cheap = 0;
+                    for (int r = 0; r < mm; r++)
+                        if (dist[r] > 0 && pc(tg[r] ^ u) <= dist[r] - 1) cheap++;
+                    if (cheap < cheap_cut) continue;
+                }
                 g_stats.pair_evals++;
                 int total = 0;
                 long long norm = 0;
@@ -247,6 +321,7 @@ int slp_bp(int n, int m, const u64 *targets, int mode, long long node_cap,
                     total += d;
                     norm += (long long)d * d;
                 }
+                log_cand(nops, u, total, base_total);
                 if (total < best_total || (total == best_total && norm > best_norm)) {
                     best_total = total; best_norm = norm;
                     besti = i; bestj = j; ties = 1;

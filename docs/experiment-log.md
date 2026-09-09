@@ -312,3 +312,21 @@ single query.
 
 That is the next experiment. This negative result is kept in full, and in the
 paper: the dead end is the finding.
+
+## 20260909T064813-candidate_ranking_free_baseline-7f6130
+
+Establish the FREE baseline before any learning: rank candidate pairs by the number of targets satisfying popcount(t^u) <= dist-1, a sufficient condition for a reduction since g <= popcount. Measures recall@K, i.e. how often an optimal candidate lands in the top K.
+
+- commit: `d599686` **(dirty tree)**
+- exit code: `0`  |  wall time: 37.3s
+- full output: `runs/logs/20260909T064813-candidate_ranking_free_baseline-7f6130.txt`
+
+```
+$ python3 scripts/eval_candidate_ranking.py --sizes 12 14 16 --instances anubis clefia_m1
+instance              steps  cands/step     r@1     r@2     r@3     r@5    r@10    r@20    r@50   r@100  frac@best
+rand_n12                 29       317.5   0.793   0.793   0.793   0.828   0.931   0.966   0.966   0.966     0.0445
+rand_n14                 36       480.8   0.611   0.639   0.639   0.694   0.778   0.833   0.889   0.889     0.0344
+rand_n16                 50       829.0   0.600   0.640   0.700   0.740   0.800   0.840   0.880   0.900     0.0278
+anubis                  108      3937.2   0.787   0.787   0.787   0.787   0.833   0.843   0.870   0.889     0.0194
+clefia_m1               110      4035.7   0.809   0.818   0.827   0.827   0.864   0.882   0.882   0.891     0.0138
+```
