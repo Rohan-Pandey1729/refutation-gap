@@ -10,7 +10,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 REPO = Path(__file__).resolve().parent.parent
-SOURCES = ["runs/optimal_results.jsonl", "runs/optimal_broad.jsonl"]
+SOURCES = ["runs/optimal_results.jsonl", "runs/optimal_broad.jsonl",
+           "runs/optimal_more.jsonl"]
 
 
 def main() -> int:

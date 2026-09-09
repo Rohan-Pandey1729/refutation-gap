@@ -103,16 +103,29 @@ MDS/cipher diffusion matrix — independently re-confirmed against Maximov 2019/
 Sun-Yang-Li 2025/1493, Duval-Leurent 2018/260 and Kranz et al. 2017/1151.
 
 Using SAT (CaDiCaL) to descend from a verified heuristic upper bound until UNSAT,
-**55 instances closed**:
+**125 instances closed** (22 inconclusive):
 
 | gap above proven optimum | instances | share |
 |---:|---:|---:|
-| 0 gates | 38 | 69.1% |
-| 1 gate | 17 | 30.9% |
+| 0 gates | 101 | 80.8% |
+| 1 gate | 23 | 18.4% |
+| 2 gates | 1 | 0.8% |
 
-Mean gap **0.31 gates**. The best of Paar1/Paar2/BP/RNBP over hundreds of
-restarts is exactly optimal about 70% of the time at n=6..8, and never more than
-one gate away.
+Mean gap **0.20 gates**. But the aggregate hides the trend that matters — the
+heuristics degrade steadily with instance size:
+
+| n | closed | heuristic exactly optimal | mean gap |
+|---:|---:|---:|---:|
+| 6 | 60 | 56/60 (93%) | 0.07 |
+| 7 | 54 | 38/54 (70%) | 0.30 |
+| 8 | 11 | 7/11 (64%) | 0.36 |
+| 9–10 | (frontier runs) | **0/4** | ≥1 |
+
+At n=6 the standard heuristics are essentially always optimal. By n=9–10, every
+instance the solver could settle showed the heuristic leaving at least one gate
+on the table. Extrapolating that trend to n=32 is exactly the wrong move — but it
+does say the published cipher figures are unlikely to be optimal, and that the
+88-gate AES MixColumns record probably still has room in it.
 
 The SAT method itself is **not** new — Fuhs & Schneider-Kamp (SAT 2010) introduced
 exactly this reduction, and Stoffelen (FSE 2016) applied it to linear matrices.

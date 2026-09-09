@@ -642,3 +642,57 @@ rand_n9_m9_d0.7_s4             49    18   rnbp     ?         295.26  inconclusiv
 
 proved optimal: 38   inconclusive: 22
 ```
+
+## 20260909T090217-aggregate_optimality_final-058556
+
+Aggregate all optimality proofs after the extended sweep
+
+- commit: `19be131` **(dirty tree)**
+- exit code: `0`  |  wall time: 0.1s
+- full output: `runs/logs/20260909T090217-aggregate_optimality_final-058556.txt`
+
+```
+$ python3 scripts/aggregate_optimality.py
+# Exact optimality results
+
+Proven-optimal g-XOR counts for small GF(2) matrices, obtained by SAT
+(CaDiCaL) descending from a verified heuristic upper bound until UNSAT.
+
+**Prior art.** The SAT-for-SLP method is Fuhs & Schneider-Kamp, SAT 2010;
+Stoffelen (FSE 2016) applied it to linear matrices. What is new here is
+coverage: exact g-XOR optima for *random* GF(2) matrices, which the
+existing exact work (cipher-derived submatrices, or the s-XOR metric on
+hand-picked instances) does not cover. See SOURCES.md section 6b.
+
+- instances closed: **125**
+- inconclusive (conflict budget exhausted): **22**
+
+## How far are the standard heuristics from optimal?
+
+The upper bound is the best of Paar1, Paar2, Boyar-Peralta and RNBP
+(hundreds of randomized restarts). The gap is that value minus the
+proven optimum.
+
+| gap (gates above optimum) | instances | share |
+|---:|---:|---:|
+| 0 | 101 | 80.8% |
+| 1 | 23 | 18.4% |
+| 2 | 1 | 0.8% |
+
+Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of the instances closed here (81%), and never worse than 2 gate(s) above optimum at these sizes.
+
+## By instance size
+
+| n | closed | heuristic optimal | mean gap | mean solve time |
+|---:|---:|---:|---:|---:|
+| 6 | 60 | 56/60 | 0.07 | 0.2 s |
+| 7 | 54 | 38/54 | 0.30 | 6.7 s |
+| 8 | 9 | 5/9 | 0.56 | 17.7 s |
+| 9 | 2 | 2/2 | 0.00 | 45.0 s |
+
+## Full results
+
+| instance | naive | heuristic | via | **optimal** | gap | solve time |
+
+... wrote docs/OPTIMALITY.md (125 closed, 22 inconclusive)
+```
