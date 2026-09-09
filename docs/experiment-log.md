@@ -367,3 +367,39 @@ BP value of 111, and ANUBIS = 108 against 106. BP's tie-breaking rule is
 unspecified in the published work, so our implementation differs in both
 directions; this is the reference-vs-exact distinction already recorded in
 RESULTS.md.
+
+## PRIOR-ART CHECK OVERTURNS TWO OF TONIGHT'S DIRECTIONS
+
+A novelty verification pass (88 tool calls, primary sources only) found that both
+of the directions taken tonight are substantially prior art:
+
+1. **SAT-based optimality for SLP over GF(2) is from 2010** — Fuhs &
+   Schneider-Kamp, SAT 2010. Same decision problem, same reduction, same purpose.
+   Stoffelen (FSE 2016) applied it to *linear* matrices too; this project had
+   assumed that work was confined to nonlinear S-boxes, which was backwards.
+2. **Accelerating BP by cutting distance-oracle work is published** — Sun, Yang
+   & Li, ePrint 2025/1493, whose Lemma 1 is an exact necessary-and-sufficient
+   condition (strictly stronger than tonight's one-sided popcount filter) with a
+   reported 200–280x speedup.
+
+Full detail and citations are in SOURCES.md sections 6b and 6c.
+
+### What this leaves
+
+Three things survive the check as genuinely open, all confirmed absent from the
+literature by an independent pass:
+
+- No published lower bound for AES MixColumns or any MDS/cipher diffusion matrix.
+- No published exact g-XOR optima for random GF(2) matrices.
+- No exact g-XOR results above roughly 8 inputs / ~13 gates — the 2010 solver
+  wall has apparently never been revisited with a modern solver.
+
+So the surviving contribution is **coverage and scale, not method**: a systematic
+measurement of how far standard SLP heuristics sit above the true optimum, on
+instance classes and at sizes nobody has closed before. That is a real but modest
+empirical contribution, and it must be framed that way.
+
+Tonight's three substantive results are therefore:
+1. A measured refutation of the learned-oracle thesis on cost grounds.
+2. A prior-art refutation of the prefilter's novelty.
+3. The optimality-gap data, which stands.

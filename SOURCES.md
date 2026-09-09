@@ -64,7 +64,7 @@ Notes on the current record (ePrint 2026/1481, received 2026-07-20, approved
 | 2.3 | Tan–Peyrin's 94 was achieved by RNBP | **REFUTED** | It was A1 and A2. RNBP gives 95. *"In the case of AES, RNBP is able to yield a 95 XOR circuit."* |
 | 2.4 | "LocalOpt" is a Tan–Peyrin algorithm | **REFUTED** | Their algorithms are BP, RSDF, RNBP, A1, A2. |
 | 2.5 | 97 should be attributed to Boyar–Peralta (2010) | **REFUTED as a citation** | The *algorithm* is BP 2010; the *number 97 for AES* is Kranz et al. 2017. Cite Kranz et al. |
-| 2.6 | 108 is specifically "Paar1" | **PARTIAL** | Paar1 = 108 is solid (Kranz et al. Tab. 3). Paar2 = 108 is UNCONFIRMED (extractions disagreed). 108 also predates Paar as a hand implementation. |
+| 2.6 | 108 is specifically "Paar1" | **VERIFIED, with caveat** | Paar1 = 108 solid (Kranz et al. Tab. 3). Paar2 = 108 now also confirmed, from Kranz Tab. 3 and Xiang Tab. 1 — but Xiang credits its Paar2 column to [KLSW17], so these are two renderings of ONE measurement, not two independent ones. 108 also predates Paar as a hand implementation. Paar2 is not reported at all for KHAZAD or WHIRLPOOL; do not attribute one. |
 
 ## 3. Metric distinction (critical)
 
@@ -172,6 +172,81 @@ ciphers no such vectors exist publicly; ours were derived and are recorded in
   no search procedure, no reproducibility, and no evaluation beyond one matrix.
 
 This paper **must be cited and explicitly distinguished.**
+
+## 6b. PRIOR ART FOR EXACT / OPTIMAL METHODS — checked 2026-09-09
+
+**This section exists because a novelty check overturned two of this project's
+working assumptions. Read it before writing any novelty claim.**
+
+### SAT for the SLP decision problem is NOT new. It is from 2010.
+
+| # | Claim | Status |
+|---|---|---|
+| 6b.1 | "First SAT/ILP encoding of *is there an SLP with k gates?*" | **REFUTED** |
+| 6b.2 | "First proof of optimality for a GF(2) linear circuit" | **REFUTED** |
+
+- **Carsten Fuhs & Peter Schneider-Kamp, "Synthesizing Shortest Linear
+  Straight-Line Programs over GF(2) Using SAT", SAT 2010, LNCS 6175:71–84,
+  DOI 10.1007/978-3-642-14186-7_8.** Abstract, verbatim: *"we show how to search
+  for a circuit of XOR gates with the minimal number of such gates. The approach
+  is based on a reduction of the associated decision problem ('Is there a program
+  of length k?') to satisfiability of propositional logic."* That is this
+  project's encoding, sixteen years earlier. They proved **k=13 optimal** on an
+  8-input AES S-box submatrix (k=12 UNSAT in 76.8 s with symmetry breaking, 4+
+  days without). On the full 21×8 matrix they found k=23 but **could not** prove
+  k=22 UNSAT: solvers ran *"more than 40 days without returning either SAT or
+  UNSAT."*
+- **Ko Stoffelen, "Optimizing S-box Implementations for Several Criteria using
+  SAT Solvers", FSE 2016 / ePrint 2016/198.** This project previously assumed
+  Stoffelen covered only *nonlinear* S-boxes. **That was backwards.** He states:
+  *"Solving the SLP over GF(2) is equivalent to finding the shortest circuit to
+  compute a function using only XOR gates"*, and proved a 7×7 linear matrix
+  minimal, failing on a 19×5 one.
+- Exhaustive-optimal work in the **s-XOR** metric also exists: Zhao, Wu, Zhang &
+  Zhang, ePrint 2016/1118 (provably minimal, hand-picked 5×5 and 6×6), and
+  LIGHTER (Jean, Peyrin, Sim, Tourteaux, ToSC 2017(4) / ePrint 2017/101).
+
+### What genuinely remains open
+
+1. **No published lower bound for AES MixColumns or any MDS/cipher diffusion
+   matrix.** Independently re-confirmed: absent from Maximov 2019/833,
+   Sun-Yang-Li 2025/1493, Duval-Leurent 2018/260, and Kranz et al. 2017/1151.
+2. **No published exact g-XOR optima for random GF(2) matrices.** Existing exact
+   work is on cipher-derived submatrices (Fuhs, Stoffelen) or in the s-XOR metric
+   on hand-picked instances (Zhao, LIGHTER).
+3. **No exact g-XOR results above roughly 8 inputs / ~13 gates.** The 2010 paper
+   hit a solver wall and, as far as the check could find, nobody has revisited it
+   with a modern solver.
+
+**Defensible framing:** scale, metric (g-XOR), and instance class (random / MDS) —
+never priority. Fuhs–Schneider-Kamp and Stoffelen must both be cited.
+
+## 6c. PRIOR ART FOR ACCELERATING BOYAR-PERALTA — checked 2026-09-09
+
+| # | Claim | Status |
+|---|---|---|
+| 6c.1 | "First work to cut BP's distance-oracle cost" | **REFUTED** |
+
+- **Sun, Yang & Li, "Revisit the Boyar-Peralta Algorithm", ePrint 2025/1493.**
+  Its stated purpose is exactly this: *"its computational inefficiency presents a
+  significant limitation… This paper proposes a novel implementation framework
+  for the BP algorithm based on linear combinations, significantly enhancing its
+  computational efficiency."* Their **Lemma 1** gives an **exact
+  necessary-and-sufficient** condition for whether a candidate pair reduces a
+  target's distance — strictly stronger than this project's one-sided sufficient
+  condition — and reports a **200–280x** speedup (235.99 s → 0.85 s at 20×20).
+- The original **Boyar–Peralta (ePrint 2009/191)** already states both halves of
+  the idea: *"Initially, Dist[i] is just one less than the Hamming weight of row
+  i"*, and the "distance can only decrease by 1" pruning.
+- **Tan–Peyrin** name the bottleneck and leave it: *"Most of the time is spent on
+  the exhaustive computation of the Dist vector."*
+
+The specific popcount prefilter used here (`popcount(t XOR u) <= dist[t]-1`
+guarantees a reduction, since `g(x) <= popcount(x)`) was not found stated
+verbatim in any source, but it follows directly from BP's own initialization
+identity and a referee will read it as a consequence, not an observation.
+**Position it as an implementation detail, benchmark against LCB-BP
+(2025/1493), and never claim priority for reducing BP's distance computations.**
 
 ## 7. Motivating context (Navier–Stokes, September 2026)
 
