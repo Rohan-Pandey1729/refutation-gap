@@ -696,3 +696,57 @@ Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of t
 
 ... wrote docs/OPTIMALITY.md (125 closed, 22 inconclusive)
 ```
+
+## 20260909T092418-aggregate_optimality_fixed-ac8558
+
+Regenerate after fixing the dedup bug found by the audit, and add the censoring analysis
+
+- commit: `1c09872` **(dirty tree)**
+- exit code: `0`  |  wall time: 0.0s
+- full output: `runs/logs/20260909T092418-aggregate_optimality_fixed-ac8558.txt`
+
+```
+$ python3 scripts/aggregate_optimality.py
+# Exact optimality results
+
+Proven-optimal g-XOR counts for small GF(2) matrices, obtained by SAT
+(CaDiCaL) descending from a verified heuristic upper bound until UNSAT.
+
+**Prior art.** The SAT-for-SLP method is Fuhs & Schneider-Kamp, SAT 2010;
+Stoffelen (FSE 2016) applied it to linear matrices. What is new here is
+coverage: exact g-XOR optima for *random* GF(2) matrices, which the
+existing exact work (cipher-derived submatrices, or the s-XOR metric on
+hand-picked instances) does not cover. See SOURCES.md section 6b.
+
+- distinct instances attempted: **148**
+- closed (optimum proved): **121**
+- inconclusive (conflict budget exhausted): **27**
+- duplicate records collapsed: **21**
+
+## Censoring: read this before quoting any percentage
+
+The gap below is measured **only on instances the solver could close**,
+and closability is not independent of the gap — a larger gap needs more
+descent steps, each one a chance to exhaust the conflict budget. The
+closed-only rate is therefore biased upward.
+
+- of the 27 inconclusive instances, **11** are
+  *provably* not optimal (a strictly smaller circuit was found before the timeout)
+- over all 148 attempted instances, the true exactly-optimal rate is
+  bounded by **68.2% - 79.1%**
+- mean provable lower bound on the gap for inconclusive instances: **>= 0.48 gates**
+
+Quote the interval, not the closed-only figure.
+
+## How far are the standard heuristics from optimal?
+
+The upper bound is the best of Paar1, Paar2, Boyar-Peralta and RNBP
+(hundreds of randomized restarts). The gap is that value minus the
+proven optimum.
+
+| gap (gates above optimum) | instances | share |
+|---:|---:|---:|
+| 0 | 101 | 83.5% |
+
+... wrote docs/OPTIMALITY.md (121 closed, 27 inconclusive)
+```

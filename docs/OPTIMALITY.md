@@ -9,8 +9,25 @@ coverage: exact g-XOR optima for *random* GF(2) matrices, which the
 existing exact work (cipher-derived submatrices, or the s-XOR metric on
 hand-picked instances) does not cover. See SOURCES.md section 6b.
 
-- instances closed: **125**
-- inconclusive (conflict budget exhausted): **22**
+- distinct instances attempted: **148**
+- closed (optimum proved): **121**
+- inconclusive (conflict budget exhausted): **27**
+- duplicate records collapsed: **21**
+
+## Censoring: read this before quoting any percentage
+
+The gap below is measured **only on instances the solver could close**,
+and closability is not independent of the gap — a larger gap needs more
+descent steps, each one a chance to exhaust the conflict budget. The
+closed-only rate is therefore biased upward.
+
+- of the 27 inconclusive instances, **11** are
+  *provably* not optimal (a strictly smaller circuit was found before the timeout)
+- over all 148 attempted instances, the true exactly-optimal rate is
+  bounded by **68.2% - 79.1%**
+- mean provable lower bound on the gap for inconclusive instances: **>= 0.48 gates**
+
+Quote the interval, not the closed-only figure.
 
 ## How far are the standard heuristics from optimal?
 
@@ -20,19 +37,19 @@ proven optimum.
 
 | gap (gates above optimum) | instances | share |
 |---:|---:|---:|
-| 0 | 101 | 80.8% |
-| 1 | 23 | 18.4% |
+| 0 | 101 | 83.5% |
+| 1 | 19 | 15.7% |
 | 2 | 1 | 0.8% |
 
-Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of the instances closed here (81%), and never worse than 2 gate(s) above optimum at these sizes.
+Mean gap: **0.17 gates**. The heuristics are exactly optimal on **101/121** of the instances closed here (83%), and never worse than 2 gate(s) above optimum at these sizes.
 
 ## By instance size
 
 | n | closed | heuristic optimal | mean gap | mean solve time |
 |---:|---:|---:|---:|---:|
-| 6 | 60 | 56/60 | 0.07 | 0.2 s |
-| 7 | 54 | 38/54 | 0.30 | 6.7 s |
-| 8 | 9 | 5/9 | 0.56 | 17.7 s |
+| 6 | 51 | 47/51 | 0.08 | 0.1 s |
+| 7 | 50 | 38/50 | 0.24 | 8.3 s |
+| 8 | 18 | 14/18 | 0.28 | 15.9 s |
 | 9 | 2 | 2/2 | 0.00 | 45.0 s |
 
 ## Full results
@@ -40,10 +57,7 @@ Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of t
 | instance | naive | heuristic | via | **optimal** | gap | solve time |
 |---|---:|---:|---|---:|---:|---:|
 | rand_n6_m6_d0.3_s0 | 10 | 8 | paar1 | **8** | +0 | 0.3 s |
-| rand_n6_m6_d0.3_s0 | 10 | 8 | paar1 | **8** | +0 | 0.5 s |
 | rand_n6_m6_d0.3_s1 | 6 | 5 | paar1 | **5** | +0 | 0.0 s |
-| rand_n6_m6_d0.3_s1 | 6 | 5 | paar1 | **5** | +0 | 0.0 s |
-| rand_n6_m6_d0.3_s2 | 7 | 6 | paar1 | **6** | +0 | 0.0 s |
 | rand_n6_m6_d0.3_s2 | 7 | 6 | paar1 | **6** | +0 | 0.0 s |
 | rand_n6_m6_d0.3_s3 | 5 | 4 | paar1 | **4** | +0 | 0.0 s |
 | rand_n6_m6_d0.3_s4 | 7 | 4 | paar1 | **4** | +0 | 0.0 s |
@@ -72,10 +86,7 @@ Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of t
 | rand_n6_m6_d0.4_s15 | 5 | 4 | paar1 | **4** | +0 | 0.0 s |
 | rand_n6_m6_d0.4_s16 | 10 | 8 | paar1 | **7** | +1 | 0.0 s |
 | rand_n6_m6_d0.5_s0 | 17 | 9 | paar1 | **9** | +0 | 0.6 s |
-| rand_n6_m6_d0.5_s0 | 17 | 9 | paar1 | **9** | +0 | 0.8 s |
 | rand_n6_m6_d0.5_s1 | 15 | 7 | bp | **7** | +0 | 0.0 s |
-| rand_n6_m6_d0.5_s1 | 15 | 7 | bp | **7** | +0 | 0.0 s |
-| rand_n6_m6_d0.5_s2 | 18 | 8 | paar1 | **8** | +0 | 0.0 s |
 | rand_n6_m6_d0.5_s2 | 18 | 8 | paar1 | **8** | +0 | 0.0 s |
 | rand_n6_m6_d0.5_s3 | 14 | 10 | paar2 | **9** | +1 | 1.6 s |
 | rand_n6_m6_d0.5_s4 | 15 | 8 | bp | **8** | +0 | 0.1 s |
@@ -92,19 +103,13 @@ Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of t
 | rand_n6_m6_d0.5_s15 | 13 | 7 | paar1 | **7** | +0 | 0.0 s |
 | rand_n6_m6_d0.5_s16 | 13 | 8 | bp | **8** | +0 | 0.1 s |
 | rand_n6_m6_d0.7_s0 | 18 | 9 | bp | **9** | +0 | 0.2 s |
-| rand_n6_m6_d0.7_s0 | 18 | 9 | bp | **9** | +0 | 0.2 s |
-| rand_n6_m6_d0.7_s1 | 24 | 6 | paar1 | **6** | +0 | 0.0 s |
 | rand_n6_m6_d0.7_s1 | 24 | 6 | paar1 | **6** | +0 | 0.0 s |
 | rand_n6_m6_d0.7_s2 | 15 | 8 | paar1 | **8** | +0 | 0.4 s |
-| rand_n6_m6_d0.7_s2 | 15 | 8 | paar1 | **8** | +0 | 0.7 s |
 | rand_n6_m6_d0.7_s3 | 16 | 8 | rnbp | **8** | +0 | 0.3 s |
 | rand_n6_m6_d0.7_s4 | 19 | 9 | bp | **9** | +0 | 0.2 s |
 | rand_n7_m7_d0.3_s0 | 7 | 6 | paar1 | **6** | +0 | 0.0 s |
-| rand_n7_m7_d0.3_s0 | 7 | 6 | paar1 | **6** | +0 | 0.0 s |
-| rand_n7_m7_d0.3_s1 | 4 | 4 | paar1 | **4** | +0 | 0.0 s |
 | rand_n7_m7_d0.3_s1 | 4 | 4 | paar1 | **4** | +0 | 0.0 s |
 | rand_n7_m7_d0.3_s2 | 10 | 8 | paar1 | **8** | +0 | 0.3 s |
-| rand_n7_m7_d0.3_s2 | 10 | 8 | paar1 | **8** | +0 | 0.4 s |
 | rand_n7_m7_d0.3_s3 | 11 | 7 | paar2 | **7** | +0 | 0.0 s |
 | rand_n7_m7_d0.3_s4 | 13 | 8 | paar1 | **8** | +0 | 0.6 s |
 | rand_n7_m7_d0.3_s5 | 7 | 5 | paar1 | **5** | +0 | 0.0 s |
@@ -132,11 +137,8 @@ Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of t
 | rand_n7_m7_d0.4_s15 | 9 | 8 | paar1 | **8** | +0 | 1.0 s |
 | rand_n7_m7_d0.4_s16 | 12 | 8 | paar1 | **8** | +0 | 0.1 s |
 | rand_n7_m7_d0.5_s0 | 22 | 11 | paar1 | **10** | +1 | 2.1 s |
-| rand_n7_m7_d0.5_s0 | 22 | 11 | paar1 | **10** | +1 | 3.3 s |
 | rand_n7_m7_d0.5_s1 | 22 | 11 | bp | **10** | +1 | 4.4 s |
-| rand_n7_m7_d0.5_s1 | 22 | 11 | bp | **10** | +1 | 6.9 s |
 | rand_n7_m7_d0.5_s2 | 19 | 12 | paar1 | **11** | +1 | 30.4 s |
-| rand_n7_m7_d0.5_s2 | 19 | 12 | paar1 | **11** | +1 | 45.9 s |
 | rand_n7_m7_d0.5_s3 | 13 | 9 | paar2 | **9** | +0 | 3.2 s |
 | rand_n7_m7_d0.5_s4 | 14 | 8 | rnbp | **8** | +0 | 0.5 s |
 | rand_n7_m7_d0.5_s5 | 18 | 8 | bp | **8** | +0 | 0.0 s |
@@ -145,21 +147,32 @@ Mean gap: **0.20 gates**. The heuristics are exactly optimal on **101/125** of t
 | rand_n7_m7_d0.5_s8 | 22 | 11 | rnbp | **11** | +0 | 34.1 s |
 | rand_n7_m7_d0.5_s9 | 10 | 7 | paar1 | **7** | +0 | 0.0 s |
 | rand_n7_m7_d0.5_s10 | 13 | 9 | paar1 | **8** | +1 | 0.1 s |
+| rand_n7_m7_d0.5_s12 | 20 | 10 | paar1 | **9** | +1 | 1.1 s |
+| rand_n7_m7_d0.5_s13 | 22 | 11 | bp | **11** | +0 | 106.8 s |
+| rand_n7_m7_d0.5_s14 | 19 | 10 | bp | **10** | +0 | 2.3 s |
+| rand_n7_m7_d0.5_s15 | 18 | 10 | bp | **10** | +0 | 3.9 s |
+| rand_n7_m7_d0.5_s16 | 16 | 11 | paar1 | **10** | +1 | 7.0 s |
 | rand_n7_m7_d0.7_s0 | 27 | 12 | paar2 | **11** | +1 | 4.9 s |
-| rand_n7_m7_d0.7_s0 | 27 | 12 | paar2 | **11** | +1 | 7.0 s |
 | rand_n7_m7_d0.7_s1 | 29 | 10 | rnbp | **9** | +1 | 0.1 s |
-| rand_n7_m7_d0.7_s1 | 29 | 10 | rnbp | **9** | +1 | 0.2 s |
 | rand_n7_m7_d0.7_s2 | 27 | 11 | bp | **10** | +1 | 2.5 s |
-| rand_n7_m7_d0.7_s2 | 27 | 11 | bp | **10** | +1 | 3.7 s |
 | rand_n7_m7_d0.7_s3 | 30 | 10 | bp | **9** | +1 | 0.3 s |
 | rand_n7_m7_d0.7_s4 | 19 | 11 | bp | **10** | +1 | 8.0 s |
 | rand_n8_m8_d0.3_s0 | 14 | 11 | paar1 | **10** | +1 | 9.9 s |
-| rand_n8_m8_d0.3_s0 | 14 | 11 | paar1 | **10** | +1 | 14.3 s |
 | rand_n8_m8_d0.3_s1 | 13 | 10 | bp | **10** | +0 | 12.5 s |
-| rand_n8_m8_d0.3_s1 | 13 | 10 | bp | **10** | +0 | 15.5 s |
 | rand_n8_m8_d0.3_s2 | 12 | 9 | paar1 | **9** | +0 | 1.8 s |
-| rand_n8_m8_d0.3_s2 | 12 | 9 | paar1 | **9** | +0 | 2.7 s |
 | rand_n8_m8_d0.3_s4 | 10 | 9 | paar1 | **9** | +0 | 2.8 s |
+| rand_n8_m8_d0.3_s5 | 14 | 10 | paar1 | **10** | +0 | 7.9 s |
+| rand_n8_m8_d0.3_s6 | 10 | 8 | paar1 | **8** | +0 | 0.7 s |
+| rand_n8_m8_d0.3_s8 | 14 | 9 | bp | **9** | +0 | 0.4 s |
+| rand_n8_m8_d0.3_s9 | 14 | 7 | paar1 | **7** | +0 | 0.0 s |
+| rand_n8_m8_d0.3_s10 | 15 | 11 | paar2 | **11** | +0 | 136.8 s |
+| rand_n8_m8_d0.3_s11 | 12 | 9 | paar1 | **8** | +1 | 0.1 s |
+| rand_n8_m8_d0.3_s12 | 12 | 9 | bp | **9** | +0 | 0.7 s |
+| rand_n8_m8_d0.3_s13 | 13 | 10 | paar2 | **10** | +0 | 4.9 s |
+| rand_n8_m8_d0.3_s14 | 8 | 7 | paar1 | **7** | +0 | 0.2 s |
+| rand_n8_m8_d0.3_s15 | 7 | 7 | paar1 | **7** | +0 | 0.0 s |
+| rand_n8_m8_d0.3_s16 | 16 | 10 | paar1 | **10** | +0 | 7.5 s |
+| rand_n8_m8_d0.4_s8 | 19 | 9 | bp | **9** | +0 | 0.4 s |
 | rand_n8_m8_d0.7_s2 | 39 | 14 | bp | **13** | +1 | 80.8 s |
 | rand_n8_m8_d0.7_s4 | 41 | 14 | paar2 | **12** | +2 | 19.1 s |
 | rand_n9_m9_d0.3_s1 | 16 | 11 | bp | **11** | +0 | 78.7 s |
@@ -172,6 +185,7 @@ nothing and are recorded only for completeness.
 
 | instance | naive | heuristic | stalled at k |
 |---|---:|---:|---:|
+| rand_n7_m7_d0.5_s11 | 24 | 12 | 11 |
 | rand_n8_m8_d0.5_s0 | 28 | 14 | 13 |
 | rand_n8_m8_d0.7_s0 | 34 | 14 | 12 |
 | rand_n8_m8_d0.5_s1 | 21 | 12 | 11 |
@@ -181,6 +195,10 @@ nothing and are recorded only for completeness.
 | rand_n8_m8_d0.5_s3 | 22 | 11 | 10 |
 | rand_n8_m8_d0.7_s3 | 31 | 15 | 12 |
 | rand_n8_m8_d0.5_s4 | 27 | 13 | 12 |
+| rand_n8_m8_d0.4_s5 | 22 | 14 | 12 |
+| rand_n8_m8_d0.4_s6 | 17 | 12 | 11 |
+| rand_n8_m8_d0.3_s7 | 18 | 12 | 11 |
+| rand_n8_m8_d0.4_s7 | 21 | 14 | 13 |
 | rand_n9_m9_d0.3_s0 | 17 | 12 | 11 |
 | rand_n9_m9_d0.5_s0 | 26 | 14 | 12 |
 | rand_n9_m9_d0.7_s0 | 48 | 18 | 17 |

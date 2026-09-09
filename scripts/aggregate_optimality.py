@@ -15,8 +15,11 @@ SOURCES = ["runs/optimal_results.jsonl", "runs/optimal_broad.jsonl",
 
 
 def main() -> int:
-    rows = []
-    seen = set()
+    # Deduplicate by instance fingerprint. The same instance is re-run across
+    # sweeps; counting it twice inflates every statistic below. Prefer a PROVED
+    # record over an inconclusive one for the same instance.
+    by_fp: dict[str, dict] = {}
+    dupes = 0
     for src in SOURCES:
         p = REPO / src
         if not p.exists():
@@ -25,14 +28,41 @@ def main() -> int:
             if not line.strip():
                 continue
             r = json.loads(line)
-            key = (r["fingerprint"], r.get("optimal"), r["proved"])
-            if r["fingerprint"] in seen and not r["proved"]:
+            fp = r["fingerprint"]
+            if fp in by_fp:
+                dupes += 1
+                prev = by_fp[fp]
+                if prev["proved"] and r["proved"]:
+                    assert prev["optimal"] == r["optimal"], (
+                        f"two runs disagree on the optimum for {r['instance']}: "
+                        f"{prev['optimal']} vs {r['optimal']}")
+                if r["proved"] and not prev["proved"]:
+                    by_fp[fp] = r
                 continue
-            seen.add(r["fingerprint"])
-            rows.append(r)
+            by_fp[fp] = r
+    rows = list(by_fp.values())
 
     proved = [r for r in rows if r["proved"]]
     unproved = [r for r in rows if not r["proved"]]
+
+    # Censoring analysis. The gap statistic is computed only over instances the
+    # solver could CLOSE, and closability is not independent of the gap: a larger
+    # gap needs more descent steps, each a chance to exhaust the budget. So the
+    # closed-only rate is biased upward and must be reported with bounds.
+    #
+    # For an inconclusive instance stalled at k, every larger k' returned SAT, so
+    # a circuit of size min(SAT k) exists and the gap is provably >= ub - that.
+    provably_suboptimal = 0
+    inconclusive_lb_gaps = []
+    for r in unproved:
+        sat_ks = [h["k"] for h in r.get("history", []) if h.get("sat")]
+        if sat_ks:
+            lb_gap = r["heuristic_ub"] - min(sat_ks)
+            inconclusive_lb_gaps.append(lb_gap)
+            if lb_gap > 0:
+                provably_suboptimal += 1
+        else:
+            inconclusive_lb_gaps.append(0)
 
     out = ["# Exact optimality results", "",
            "Proven-optimal g-XOR counts for small GF(2) matrices, obtained by SAT",
@@ -43,8 +73,28 @@ def main() -> int:
            "coverage: exact g-XOR optima for *random* GF(2) matrices, which the",
            "existing exact work (cipher-derived submatrices, or the s-XOR metric on",
            "hand-picked instances) does not cover. See SOURCES.md section 6b.", "",
-           f"- instances closed: **{len(proved)}**",
-           f"- inconclusive (conflict budget exhausted): **{len(unproved)}**", ""]
+           f"- distinct instances attempted: **{len(rows)}**",
+           f"- closed (optimum proved): **{len(proved)}**",
+           f"- inconclusive (conflict budget exhausted): **{len(unproved)}**",
+           f"- duplicate records collapsed: **{dupes}**", ""]
+
+    n_all = len(rows)
+    gap0_closed = sum(1 for r in proved if r["heuristic_ub"] == r["optimal"])
+    lo = gap0_closed / n_all
+    hi = (gap0_closed + len(unproved) - provably_suboptimal) / n_all
+    out += ["## Censoring: read this before quoting any percentage", "",
+            "The gap below is measured **only on instances the solver could close**,",
+            "and closability is not independent of the gap — a larger gap needs more",
+            "descent steps, each one a chance to exhaust the conflict budget. The",
+            "closed-only rate is therefore biased upward.", "",
+            f"- of the {len(unproved)} inconclusive instances, **{provably_suboptimal}** are",
+            "  *provably* not optimal (a strictly smaller circuit was found before the timeout)",
+            f"- over all {n_all} attempted instances, the true exactly-optimal rate is",
+            f"  bounded by **{lo:.1%} - {hi:.1%}**",
+            f"- mean provable lower bound on the gap for inconclusive instances: "
+            f"**>= {sum(inconclusive_lb_gaps)/max(1,len(inconclusive_lb_gaps)):.2f} gates**",
+            "",
+            "Quote the interval, not the closed-only figure.", ""]
 
     gaps = Counter(r["heuristic_ub"] - r["optimal"] for r in proved)
     total = sum(gaps.values())
