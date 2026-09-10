@@ -42,9 +42,9 @@ input space, and self-contained Lean~4 certificates---and give four case studies
 in which a layer caught a real defect that code review did not, twice overruling
 an explicit natural-language argument. On the refutation side we close the gap:
 every decisive \textsc{unsat} answer emits a DRAT proof that is checked by an
-independent third-party checker. All $62$ refutations verify, agreeing with the
-uncertified results in every case, at a median proof size of $0.14$\,MB and a
-checking cost that is a small multiple of solving. We also report a practical
+independent third-party checker. All $75$ refutations verify, agreeing with the
+uncertified results in every case, at a median proof size of $0.37$\,MB and a
+checking cost of roughly $2\times$ solving. We also report a practical
 obstacle for anyone attempting this: the fastest solver in our pipeline emits,
 through a standard Python interface, proofs the checker rejects. Finally we
 argue that in AI-assisted research the \emph{write-up} is an artifact requiring
@@ -101,7 +101,7 @@ the construction side and $121$ optimality results resting on bare solver output
       $\mathrm{GF}(2)$ circuits and four case studies where a layer caught a
       real defect that inspection missed (\S\ref{sec:construction}).
 \item We close the gap with proof-carrying refutations and measure the cost:
-      $62/62$ verified, median proof $0.14$\,MB, checking a small multiple of
+      $84/84$ instances certified, median proof $0.37$\,MB, checking $\approx 2\times$
       solving (\S\ref{sec:closing}). We report a solver-interface obstacle that
       cost us the faster solver.
 \item We argue the research write-up is itself an artifact requiring
@@ -179,6 +179,23 @@ abstraction gap to argue about. Each file ends with \code{\#print axioms}, so
 the trust base is reported rather than assumed. Self-containment is deliberate:
 a certificate that requires resolving a library version is a certificate most
 readers will never check.
+
+The certificates compile under Lean 4.33.1 and report:
+\begin{quote}\small
+\code{'Cert.cert' depends on axioms: [propext]}\\
+\code{'Cert.gate\_count' does not depend on any axioms}
+\end{quote}
+This is the outcome we wanted and it is worth being precise about why. The
+correctness theorem is discharged by \code{decide}, so it is checked by the
+Lean kernel itself; the axiom list contains neither \code{sorryAx} (an
+incomplete proof) nor \code{Lean.ofReduceBool} (which \code{native\_decide}
+introduces, and which trusts the compiler rather than the kernel).
+\code{propext} is one of Lean's three standard axioms and is not in dispute.
+The gate-count theorem is axiom-free. We flag this because \code{native\_decide}
+is the path of least resistance for certificates of this shape---it is far
+faster---and it silently moves the trust base from a small kernel to an
+optimizing compiler. A certificate that does not print its axioms gives the
+reader no way to tell which of the two they are being offered.
 
 \subsection{What the layers actually caught}
 
@@ -267,24 +284,24 @@ We re-established every previously closed instance under this regime.
 \small
 \begin{tabular}{lr}
 \toprule
-Instances re-established & 71 \\
-\quad certified by an independently checked refutation & 62 \\
+Instances re-established & 84 \\
+\quad certified by an independently checked refutation & 75 \\
 \quad closed by a counting bound, no refutation needed & 9 \\
 \quad \textbf{uncertified} & \textbf{0} \\
 Disagreements with the earlier uncertified results & 0 \\
 \midrule
-DRAT proof size, median / max & 0.14 MB / 15.5 MB \\
-Solve time with proof logging, median / max & 0.02\,s / 4.3\,s \\
-Independent check time, median / max & 0.09\,s / 6.9\,s \\
-Check/solve ratio, median & $4.3\times$ \\
-Check/solve ratio, largest instance & $1.6\times$ \\
+DRAT proof size, median / max & 0.37 MB / 229 MB \\
+Solve time with proof logging, median / max & 0.06\,s / 97.9\,s \\
+Independent check time, median / max & 0.13\,s / 241.6\,s \\
+Check/solve ratio, median & $2.3\times$ \\
+Check/solve ratio, largest instance & $2.5\times$ \\
 \bottomrule
 \end{tabular}
 \caption{Proof-carrying optimality. Every refutation the pipeline relies on is
 now checked by a third-party checker, and every previously uncertified result
-survived. The median check/solve ratio is dominated by the checker's fixed
-startup cost on tiny instances; on the largest instance, where the ratio is
-meaningful, checking costs $1.6\times$ solving.}
+survived. The ratio is stable across the range: checking costs
+roughly $2.5\times$ solving on the largest instance, where a $229$\,MB proof took
+$242$\,s to check against $98$\,s to produce.}
 \label{tab:cert}
 \end{table}
 
@@ -300,7 +317,7 @@ instances grow.}
 \label{fig:cert}
 \end{figure}
 
-Two things are worth drawing out. First, \textbf{nothing broke}: all $62$
+Two things are worth drawing out. First, \textbf{nothing broke}: all $75$
 refutations verified and every optimality value agreed with what the uncertified
 runs had reported. That is the expected outcome, and it is worth stating plainly
 because it is the outcome that makes certification look unnecessary. It is not:
@@ -309,9 +326,12 @@ one in which a subtle solver or encoding bug had corrupted some fraction of our
 lower bounds, and neither can any of the published results that report bare
 verdicts.
 
-Second, the cost is small. At these sizes proof logging did not measurably slow
-solving, proofs are megabytes rather than gigabytes, and checking costs roughly
-$1.6\times$ solving where the ratio is meaningful.
+Second, the cost is real but affordable, and it grows. Proof logging did not
+measurably slow solving (median $0.06$\,s against a $0.04$\,s unlogged
+baseline), and checking costs about $2.3\times$ solving. But the tail is steep:
+the hardest instance in the set produced a $229$\,MB proof needing $242$\,s to
+check, three orders of magnitude above the median, at only $n=7$. Certification
+is cheap on average and expensive exactly where the mathematics is interesting.
 
 \subsection{An obstacle worth reporting}
 
@@ -370,6 +390,16 @@ suggests certified optimality is within reach for the matrices practitioners
 care about; the contribution is that where optimality \emph{is} claimed, the
 refutation can and should be certified.
 
+\textbf{Certification has a memory wall before it has a time wall.} Proofs are
+returned by the solver interface as in-memory objects before they can be written
+out, so a proof large enough to exhaust RAM aborts the run rather than merely
+slowing it. We hit this: our first certification sweep was killed outright by a
+single instance whose proof exceeded available memory. The fix was to isolate
+each instance in its own process with an address-space cap, so that an
+uncertifiable instance is \emph{recorded as uncertifiable} instead of destroying
+the run. We mention it because the failure mode is silent and the natural
+implementation has it.
+
 \textbf{The checker is trusted.} \code{drat-trim} is a third party relative to
 the solver, which is the property we need, but it is not itself formally
 verified. A stronger pipeline would emit LRAT and check it with a verified
@@ -383,10 +413,15 @@ encoding faithfully captures the problem. That argument remains a
 natural-language one, which---per \S\ref{sec:construction}(iv)---is precisely the
 kind of thing we have learned to distrust.
 
-\textbf{Lean certificates.} The Lean~4 certificates are generated and their
-semantics are validated by a shadow evaluator that re-implements the definitions
-and includes negative controls. \textcolor{red}{[STATUS: compile output and
-axiom lists to be inserted before submission.]}
+\textbf{Lean certificates.} The certificates compile and report a clean axiom
+list (\S\ref{sec:construction}), and their semantics are additionally validated
+by a shadow evaluator that re-implements the Lean definitions in a second
+language with negative controls. What the certificate establishes is that the
+emitted program computes the emitted target matrix; that the target matrix is
+the intended cipher matrix is established separately, by test vectors
+(\S\ref{sec:setting}) rather than by the proof term. Defect~(ii) in
+\S\ref{sec:construction} is precisely a failure of that outer link, and no
+amount of proof-term checking would have caught it.
 
 \section{Related work}
 
