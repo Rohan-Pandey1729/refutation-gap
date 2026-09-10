@@ -4,3 +4,11 @@ slp/libslp.so
 runs/logs/
 data/
 tools/drat-trim/
+
+# --- Submission material: must NOT reach a public remote ---
+# The VeriCodeGen submission is double-blind. This repository is public and
+# carries the author's name, so the paper is deliberately untracked here to make
+# an accidental `git add -A && git push` unable to deanonymize the submission.
+# Keep the paper in a separate private repository until notification.
+paper/
+runs/lean/
