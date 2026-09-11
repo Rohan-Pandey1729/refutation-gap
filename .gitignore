@@ -5,10 +5,26 @@ runs/logs/
 data/
 tools/drat-trim/
 
-# --- Submission material: must NOT reach a public remote ---
-# The VeriCodeGen submission is double-blind. This repository is public and
-# carries the author's name, so the paper is deliberately untracked here to make
-# an accidental `git add -A && git push` unable to deanonymize the submission.
-# Keep the paper in a separate private repository until notification.
-paper/
-runs/lean/
+# --- DRAT proofs: too large for GitHub ---
+# The decisive refutations for the four hardest instances are 113-287 MB each,
+# above GitHub's 100 MB per-file limit. The .cnf formulas they refute ARE
+# tracked, and runs/proofs/MANIFEST.sha256 pins each proof by SHA-256 with the
+# command that regenerates it, so the evidence chain survives without the bytes.
+runs/proofs/*.drat
+runs/recheck/
+
+# --- Submission material ---
+# The VeriCodeGen submission is double-blind. This repository is now PRIVATE, so
+# the paper is tracked here. If this repo is ever made public before the
+# notification date (2026-09-29), untrack paper/ again first -- a public repo
+# carrying the author's name would deanonymize the submission.
+runs/lean/*.olean
+
+# --- LaTeX build artifacts ---
+paper/*.aux
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.out
+paper/*.bak
+paper/*.tex.bak

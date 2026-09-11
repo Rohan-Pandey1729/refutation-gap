@@ -1,0 +1,20 @@
+# DRAT proof manifest -- runs/proofs/
+#
+# These four proofs are 113-287 MB each, above GitHub's 100 MB per-file limit,
+# so the .drat files are NOT tracked. The .cnf files (the formulas they refute)
+# ARE tracked, and each proof is regenerable from its instance:
+#
+#   python3 -c "from slp.benchmarks.registry import random_matrix;
+#               from slp.certified import prove_unsat;
+#               print(prove_unsat(random_matrix(n,n,d,seed), k, keep_proof=True))"
+#
+# Verify a regenerated proof against this manifest with sha256sum.
+# All four were independently checked by drat-trim on 2026-09-11: s VERIFIED.
+edd348d267407887a4aa092891cfac1453130d0da4a9addfb1f66812020c66fd  runs/proofs/28e392ecbac11b09_k10_glucose42.drat
+    instance=rand_n9_m9_d0.3_s1  n=9  k=10  optimal=11  bytes=118328315  solver=glucose42  verdict=VERIFIED  check=91.0s
+b7dcd21cdc74624b85f031a4962298359f912a5e82068c6a15fdd862a75d06de  runs/proofs/3ef129eb97a1b534_k9_glucose42.drat
+    instance=rand_n7_m7_d0.7_s4  n=7  k=9  optimal=10  bytes=272982203  solver=glucose42  verdict=VERIFIED  check=333.2s
+38cfd39a387c1ee45bcba6a1d6dd80289df4937916c81b954fe0d30e8a5b78e6  runs/proofs/5a6a9ead4afb3ebe_k10_glucose42.drat
+    instance=rand_n7_m7_d0.5_s13  n=7  k=10  optimal=11  bytes=301283387  solver=glucose42  verdict=VERIFIED  check=440.3s
+5b3d5f4bc0208ef7c7f9d38f66fcc38462f1ee55ab98ddde78e1c9b3b69b5c20  runs/proofs/a212dd31fd36f07c_k10_glucose42.drat
+    instance=rand_n8_m8_d0.3_s10  n=8  k=10  optimal=11  bytes=299422325  solver=glucose42  verdict=VERIFIED  check=374.5s

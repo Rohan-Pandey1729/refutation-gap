@@ -103,3 +103,73 @@ quantitative claim in `FINDINGS.md` and `README.md` against the raw data in
   in `slp/optimal.py`'s docstring. The only independent cross-check is a
   brute-force test at n=4 with ≤6 gates, well below the n=6–9 range where results
   are claimed. **This is the most important gap in the project.**
+
+---
+
+## 2026-09-11 — pre-submission audit round
+
+Run against the revised paper draft by two independent subagents (an adversarial
+claim auditor with access to the raw run records, and a source re-checker),
+under the project's standing rule that no claim ships without a primary source.
+
+### Errors found in our own claims (all now corrected)
+
+5. **A failure tail manufactured by our own harness.** The draft reported that
+   4 of 121 instances "resisted certification within a 150 s per-instance cap."
+   The auditor re-ran the four DRAT proofs, which were still in `runs/proofs/`.
+   **All four verify.** One (`28e392ecbac11b09`, n=9) checks in 83.9 s — inside
+   the cap we claimed had excluded it. Its JSONL row reads `"timeout at 123s"`,
+   not 150 s: `certify_decisive.py` computes the per-instance allowance as
+   `min(cap, deadline - now)`, so it silently inherited the remainder of the
+   global `--budget-seconds`. We described a cap we did not apply and then
+   reported the artifact as a property of the problem.
+   *Fix:* `scripts/merge_certification.py` merges the budgeted sweep with an
+   unbudgeted re-run of the four (`runs/recheck_resisted.jsonl`) into
+   `runs/certification_final.jsonl`. Result: **121/121 certified, 111 by checked
+   refutation, 10 by counting bound, 0 rejected, 0 disagreements.**
+
+6. **"No published lower bound for any MDS diffusion matrix" was false.**
+   Venkateswarlu, Kesarwani & Sarkar (ToSC 2022(4):266–290) prove every 4×4 MDS
+   matrix over GL(n,𝔽₂) costs ≥ 8n+3 in **sw-XOR**. AES MixColumns is such a
+   matrix. The narrower claim — no lower bound on the **g-XOR** count in which
+   the record chain is stated — does hold, and those authors list g-XOR lower
+   bounds as future work. *Fix:* paper now states the narrow claim and cites the
+   paper that would otherwise refute it. See SOURCES.md §2.2a–2.2b.
+
+7. **Layer 2's cost was asserted, not measured — and understated ~3×.** The
+   draft said "0.1–1 s per circuit". Measured (`runs/layer2_timing.jsonl`): the
+   complete encoding is **2.59–4.58 s** over five cipher matrices; the fast
+   encoding the pipeline actually calls is **0.020–0.131 s** but returns
+   `unknown` after 120 s on AES InvMixColumns — **4 of 5**. Both numbers and the
+   silent failure are now in the paper.
+
+8. **Record-marker bug in the records figure.** `is_rec` was computed as
+   `g == min(gg for yy, gg, *_ in PUB if yy <= y)`, so within-year ties resolved
+   by value rather than publication date, drawing 103 (Bit-Sliding, CHES 2017)
+   and 95 (Banik et al., IWSEC 2019) as *non*-records. Both were records when
+   published. Record status is now set explicitly from SOURCES.md §2.
+
+9. **"CaDiCaL is the faster solver" was unsupported.** On 75 paired instances
+   Glucose-with-proof and CaDiCaL are 0.4% apart in total solve time, against
+   ~1.3× run-to-run variance. Paper now says "indistinguishable at these sizes".
+
+10. **BP reproduction was reported only where it succeeded.** RESULTS.md records
+    ANUBIS 108 vs published 106 and CLEFIA M1 110 vs 111. The paper now reports
+    both, and flags that attributing them to BP's unspecified tie-breaking is
+    itself a natural-language argument.
+
+### Claims re-checked and found correct
+121/117→121 counts, all proof/solve/check medians and maxima, the check/solve
+ratios, the 13 Lean certificates (98–121 gates, 4.99–7.60 s, all `[propext]`),
+correlation +0.36, the 20% dedup inflation, the censored-statistic interval, all
+five Paar baselines, the CLEFIA 134→121 correction, and every year and
+attribution in the nine-entry record chain.
+
+### Artifacts added
+- `runs/recheck_resisted.jsonl` — unbudgeted re-run of the four
+- `runs/certification_final.jsonl` — canonical 121-row record, `source` per row
+- `runs/layer2_timing.jsonl` — measured Z3 cost, both encodings
+- `runs/anatomy_instance.json` — the Figure 4 instance, all three layers
+- `lean/certs/rand_n8_m8_d0.3_s11_optimal_8.lean` — first certificate paired
+  with a checked refutation for the *same* instance
+- `scripts/merge_certification.py`

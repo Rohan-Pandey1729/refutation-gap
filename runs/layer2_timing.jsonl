@@ -1,0 +1,5 @@
+{"instance": "aes_mixcolumns", "n_inputs": 32, "gates": 108, "fast_ok": true, "fast_seconds": 0.020491361618041992, "full_seconds": 2.58888840675354}
+{"instance": "aes_inv_mixcolumns", "n_inputs": 32, "gates": 170, "fast_ok": false, "fast_seconds": null, "full_seconds": 4.578567028045654}
+{"instance": "anubis", "n_inputs": 32, "gates": 121, "fast_ok": true, "fast_seconds": 0.05664372444152832, "full_seconds": 3.1832497119903564}
+{"instance": "clefia_m0", "n_inputs": 32, "gates": 121, "fast_ok": true, "fast_seconds": 0.06346607208251953, "full_seconds": 2.9871761798858643}
+{"instance": "clefia_m1", "n_inputs": 32, "gates": 121, "fast_ok": true, "fast_seconds": 0.13115906715393066, "full_seconds": 3.115543842315674}

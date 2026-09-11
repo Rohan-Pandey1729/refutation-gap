@@ -1,0 +1,43 @@
+{
+ "instance": "rand_n8_m8_d0.3_s11",
+ "fingerprint": "09f592b144a26e88",
+ "gates": 8,
+ "layer1_ok": true,
+ "layer2_z3_ok": true,
+ "layer2_z3_seconds": 0.22006011009216309,
+ "lean_cert": "lean/certs/rand_n8_m8_d0.3_s11_optimal_8.lean",
+ "program": [
+  [
+   1,
+   3
+  ],
+  [
+   0,
+   5
+  ],
+  [
+   4,
+   5
+  ],
+  [
+   1,
+   10
+  ],
+  [
+   7,
+   11
+  ],
+  [
+   2,
+   9
+  ],
+  [
+   4,
+   7
+  ],
+  [
+   10,
+   13
+  ]
+ ]
+}

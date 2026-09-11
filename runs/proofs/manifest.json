@@ -1,0 +1,54 @@
+[
+ {
+  "path": "runs/proofs/28e392ecbac11b09_k10_glucose42.drat",
+  "sha256": "edd348d267407887a4aa092891cfac1453130d0da4a9addfb1f66812020c66fd",
+  "bytes": 118328315,
+  "fingerprint": "28e392ecbac11b09",
+  "instance": "rand_n9_m9_d0.3_s1",
+  "n": 9,
+  "k": 10,
+  "optimal": 11,
+  "solver": "glucose42",
+  "verdict": "VERIFIED",
+  "check_seconds": 91.02212929725647
+ },
+ {
+  "path": "runs/proofs/3ef129eb97a1b534_k9_glucose42.drat",
+  "sha256": "b7dcd21cdc74624b85f031a4962298359f912a5e82068c6a15fdd862a75d06de",
+  "bytes": 272982203,
+  "fingerprint": "3ef129eb97a1b534",
+  "instance": "rand_n7_m7_d0.7_s4",
+  "n": 7,
+  "k": 9,
+  "optimal": 10,
+  "solver": "glucose42",
+  "verdict": "VERIFIED",
+  "check_seconds": 333.169730424881
+ },
+ {
+  "path": "runs/proofs/5a6a9ead4afb3ebe_k10_glucose42.drat",
+  "sha256": "38cfd39a387c1ee45bcba6a1d6dd80289df4937916c81b954fe0d30e8a5b78e6",
+  "bytes": 301283387,
+  "fingerprint": "5a6a9ead4afb3ebe",
+  "instance": "rand_n7_m7_d0.5_s13",
+  "n": 7,
+  "k": 10,
+  "optimal": 11,
+  "solver": "glucose42",
+  "verdict": "VERIFIED",
+  "check_seconds": 440.26641368865967
+ },
+ {
+  "path": "runs/proofs/a212dd31fd36f07c_k10_glucose42.drat",
+  "sha256": "5b3d5f4bc0208ef7c7f9d38f66fcc38462f1ee55ab98ddde78e1c9b3b69b5c20",
+  "bytes": 299422325,
+  "fingerprint": "a212dd31fd36f07c",
+  "instance": "rand_n8_m8_d0.3_s10",
+  "n": 8,
+  "k": 10,
+  "optimal": 11,
+  "solver": "glucose42",
+  "verdict": "VERIFIED",
+  "check_seconds": 374.5386941432953
+ }
+]
