@@ -92,9 +92,17 @@ We call this the \textbf{refutation gap}. In the literature we study---minimal
 XOR circuits for cryptographic diffusion layers---nine published gate counts
 for the AES MixColumns matrix have appeared since 2001, and \emph{not one}
 ships a certificate of any kind, for either half of the claim
-(\S\ref{sec:gap}). When we built our own pipeline we reproduced the pattern
-without noticing: three independent verification layers on the construction
-side, and $121$ optimality results resting on bare solver output.
+(\S\ref{sec:gap}).
+
+This is not a problem confined to pre-AI practice. The current record, $88$
+gates~\citep{jean2026}, is a two-page note whose acknowledgements read: ``This
+result has been found with the help of AI, most specifically models from OpenAI
+under codex.'' It reports no lower bound, no optimality claim, and no
+correctness-verification procedure. The state of the art on this benchmark was
+set by a code-generating model, and what it shipped was a number. When we built
+our own pipeline we reproduced the same pattern without noticing: three
+independent verification layers on the construction side, and $121$ optimality
+results resting on bare solver output.
 
 \paragraph{Contributions.}
 \begin{enumerate}\itemsep1pt
@@ -318,7 +326,9 @@ entirely one-sided, and no entry ships a certificate for either half.}
 \end{figure}
 
 The gap is structural: the incentive is to report a better \emph{object}, and an
-object is self-evidencing. A refutation has nothing to show.
+object is self-evidencing. A refutation has nothing to show. That structure is
+what AI-assisted synthesis inherits---and, on this benchmark, has already
+reproduced at the frontier.
 
 \section{Closing it: proof-carrying refutations}
 \label{sec:closing}

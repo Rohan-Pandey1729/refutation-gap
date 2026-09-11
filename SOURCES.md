@@ -168,7 +168,11 @@ ciphers no such vectors exist publicly; ours were derived and are recorded in
 | 6.3 | ML-in-crypto ePrint work is adjacent | Clusters in cryptanalysis (neural distinguishers, side-channel) and RL for variational quantum circuits. None address SLP. |
 
 **⚠️ Novelty framing constraint.** The current 88-XOR record (Jean, ePrint
-2026/1481) was itself produced with LLM assistance. Therefore:
+2026/1481) was itself produced with AI assistance. **Verified 2026-09-11 from
+the PDF body** (the abstract does not say this; the Acknowledgements do),
+verbatim: *"This result has been found with the help of AI, most specifically
+models from OpenAI under codex."* The same note states **no** lower bound, **no**
+optimality claim, and **no** correctness-verification procedure. Therefore:
 
 - ❌ **Not defensible:** "first application of AI to the SLP problem."
 - ✅ **Defensible:** "first systematic, published, reproducible *methodology* for
