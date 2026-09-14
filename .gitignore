@@ -28,3 +28,6 @@ paper/*.log
 paper/*.out
 paper/*.bak
 paper/*.tex.bak
+
+# transport bundle, not part of the project
+slp-rewritten.bundle
