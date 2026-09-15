@@ -12,7 +12,14 @@ ss = [r["solve_seconds"] for r in ver]
 cs = [r["check_seconds"] for r in ver]
 rat = [c / s for c, s in zip(cs, ss)]
 big = max(ver, key=lambda r: r["proof_bytes"])
-lean = open("runs/lean/axioms.txt").read()
+_lean_all = open("runs/lean/axioms.txt").read()
+# The file has two parts: the 13 cipher certificates (Lean 4.33.1), which are
+# what section 3 reports, and a trailing note recording the Figure 4 instance
+# (Lean 4.34.0), which is recorded in runs/anatomy_instance.json. Count them
+# separately so a claim about one is never satisfied by the other.
+_MARK = "# --- 2026-09-15: the Figure 4 instance"
+lean = _lean_all.split(_MARK)[0]
+anat = json.load(open("runs/anatomy_instance.json"))
 lrows = re.findall(r"^# (\S+\.lean)\s+gates=\s*(\d+)\s+([\d.]+)s", lean, re.M)
 lg = [int(a) for _, a, _ in lrows]; lt = [float(b) for *_, b in lrows]
 l2 = [json.loads(l) for l in open("runs/layer2_timing.jsonl")]
@@ -43,6 +50,12 @@ CHECKS = [
     ("lean gates max",           max(lg),                  121),
     ("lean median s",            round(st.median(lt), 1),  5.8),
     ("lean propext lines",       lean.count("[propext]"),  13),
+    ("fig4 lean compiled",       anat["lean"]["compiled"],  True),
+    ("fig4 lean errors",         anat["lean"]["errors"],    0),
+    ("fig4 lean axioms",         "[propext]" in anat["lean"]["print_axioms"][0], True),
+    ("fig4 lean version",        anat["lean"]["lean_version"], "4.34.0"),
+    ("fig4 gates",               anat["gates"],             8),
+    ("fig4 z3 ok",               anat["layer2_z3_ok"],      True),
     ("layer2 fast ok",           len(fast),                4),
     ("layer2 fast min s",        round(min(fast), 2),      0.02),
     ("layer2 fast max s",        round(max(fast), 2),      0.13),

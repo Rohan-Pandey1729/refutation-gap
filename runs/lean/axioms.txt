@@ -56,3 +56,17 @@
 === lean/certs/anubis_paar1.lean
 'CertAnubis.cert' depends on axioms: [propext]
 'CertAnubis.gate_count' does not depend on any axioms
+
+# --- 2026-09-15: the Figure 4 instance ---------------------------------------
+# The 13 entries above are the cipher matrices, all compiled under Lean 4.33.1.
+# The certificate for the random instance shown in Figure 4 is recorded
+# separately, in runs/anatomy_instance.json, because it was compiled later and
+# under a different toolchain:
+#
+#   rand_n8_m8_d0.3_s11_optimal_8.lean   gates=  8   Lean 4.34.0   0 errors
+#     'CertRandn8m8d03s11.cert' depends on axioms: [propext]
+#     'CertRandn8m8d03s11.gate_count' does not depend on any axioms
+#
+# This is the first certificate in the project paired with an independently
+# checked refutation for the same instance, i.e. the first full instantiation
+# of the certificate pair in equation (5).

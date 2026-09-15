@@ -363,10 +363,7 @@ solver verdict no longer suffices. Figure~\ref{fig:anatomy} shows both halves of
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figs/anatomy.pdf}
-\caption{\textbf{One certified optimality result, in full.} Left: the witness,
-an $8$-gate program, re-executed, proved equivalent to $M$ over the whole input
-space, and shipped as a Lean~4 certificate whose printed axiom list is
-\code{[propext]}. Right: the refutation at $k=7$, a $0.91$\,MB DRAT proof an
+\caption{\textbf{One certified optimality result, in full.} Left: the witness, an $8$-gate program, re-executed, proved equivalent to $M$ over the whole input space, and shipped as a Lean~4 certificate whose printed axiom list is \code{[propext]} (compiled under Lean~4.34.0; the thirteen cipher certificates of \S\ref{sec:construction} were compiled under 4.33.1). Right: the refutation at $k=7$, a $0.91$\,MB DRAT proof an
 independent checker confirms in $0.24$\,s. Together they instantiate
 \eqref{eq:pair} for a single matrix: both halves of $\mathrm{SLP}(M)=8$ are
 objects a reader can re-check, rather than verdicts. Two things are still taken
@@ -567,8 +564,7 @@ halves of \eqref{eq:pair}. The thirteen circuits with Lean certificates are
 cipher matrices at $n=32$, far beyond the solver's reach, so their minimality is
 not claimed at all; the $111$ refutations are random matrices at $n \le 9$, whose
 witnesses are re-executed and checked symbolically but were not, in the sweep,
-emitted as proof terms. The pair is cheap to form, and we formed it on request for
-Figure~\ref{fig:anatomy}, but the paper demonstrates it once, not $121$ times.
+emitted as proof terms. The pair is cheap to form, and we formed it for Figure~\ref{fig:anatomy}, where both halves are checked objects: an $8$-gate witness whose Lean certificate compiles with axiom list \code{[propext]}, and a refutation at $k=7$ that \code{drat-trim} verifies. But the paper demonstrates that pairing once, not $121$ times.
 
 \textbf{Lean certificates.} A certificate establishes that the emitted program
 computes the emitted target matrix; that the target matrix is the intended

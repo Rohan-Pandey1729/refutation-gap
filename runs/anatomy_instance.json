@@ -39,5 +39,17 @@
    10,
    13
   ]
- ]
+ ],
+ "lean": {
+  "compiled": true,
+  "date": "2026-09-15",
+  "lean_version": "4.34.0",
+  "machine": "arm64-apple-darwin24.6.0",
+  "errors": 0,
+  "print_axioms": [
+   "'CertRandn8m8d03s11.cert' depends on axioms: [propext]",
+   "'CertRandn8m8d03s11.gate_count' does not depend on any axioms"
+  ],
+  "note": "Compiled after the namespace fix (defect 11). The pre-fix file elaborated but did not parse: two syntax errors, and the axiom lines came out under the truncated namespace CertRandn8m8d0."
+ }
 }

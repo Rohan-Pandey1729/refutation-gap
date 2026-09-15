@@ -65,9 +65,9 @@ real error on 2026-09-11 (a check/solve ratio written as 2.8× that is 2.7×).
 
 ## Open items before submitting
 
-1. **Compile the new Lean certificate** and paste the axiom line:
-   `lean lean/certs/rand_n8_m8_d0.3_s11_optimal_8.lean`. Figure 4 asserts
-   `[propext]` for it; the other 13 are verified, this one is not yet.
+1. ~~Compile the new Lean certificate.~~ **Done 2026-09-15**, Lean 4.34.0,
+   0 errors: `cert` depends on `[propext]`, `gate_count` on nothing. Recorded in
+   `runs/anatomy_instance.json`. Every claim in the paper is now backed.
 2. **Re-check ePrint** for anything superseding 88 XOR on AES MixColumns
    (last checked 2026-09-11: nothing found, 2026/1481 still v1).
 3. Paste the body into the official template and confirm it still fits 9 pages.
