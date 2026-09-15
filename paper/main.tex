@@ -43,7 +43,7 @@ optimality results the project had established, across $n=6$--$9$: $111$ carry a
 refutation that an independent checker verifies, $10$ are closed by a free
 counting bound, and none disagrees with the uncertified value. The median proof
 is $1.1$\,MB and checking costs $1.9\times$ solving. Along the way
-we give four case studies in which a verification layer caught a real defect
+we give five case studies in which a verification layer caught a real defect
 code review did not; report two interface obstacles: a solver whose proofs the
 checker rejects, and a fast equivalence check that silently returns
 \code{unknown}, each pushing practitioners toward the uncertified path; and
@@ -109,7 +109,7 @@ results resting on bare solver output.
 \item We name and quantify the refutation gap in a working synthesis pipeline
       (\S\ref{sec:gap}), and show it is the norm in the surrounding literature.
 \item We report a three-layer certification stack for synthesized
-      $\GF$ circuits and four case studies where a layer caught a
+      $\GF$ circuits and five case studies where a layer caught a
       real defect that inspection missed (\S\ref{sec:construction}).
 \item We close the gap with proof-carrying refutations and measure the cost:
       all $121$ instances certified across $n=6$--$9$, median proof $1.1$\,MB,
@@ -262,20 +262,32 @@ counts, occasional self-XOR
 Lean
 & round-trip parse test
 & visual inspection of the output \\[3pt]
-(iv) A source review argued one cipher applies its matrix by
-right-multiplication, so we transposed
+(iv) A source review argued one cipher applies its
+matrix by right-multiplication, so we transposed
 & numerical cross-validation: \emph{failed} transposed, \emph{passed} original
-& a clear, confident natural-language argument \\
+& a clear, confident natural-language argument \\[3pt]
+(v) The Lean emitter put the instance name into the namespace unescaped, so a
+density made \code{namespace CertRandn8m8d0.3s11}: two identifiers, not one
+& compiling the file, the first time a certificate for a random instance was
+ever produced
+& every test we had, and the shadow evaluator: the file was right about the
+mathematics and malformed as a file \\
 \bottomrule
 \end{tabular}
-\caption{Four real defects and what caught each. None was found by reading.
+\caption{Five real defects and what caught each. None was found by reading.
 Item~(ii) is the failure mode internal verification structurally cannot
 reach, and argues that reproducing published numbers is a verification layer in
 its own right. In~(iv), and in a second instance where a size trend we had
 written up as a headline finding turned out to be an artifact of a counting
 bug, a natural-language argument was confidently wrong and a mechanical check
 was right. Where an LLM supplies the reasoning, the reasoning is worth having
-and it is not evidence.}
+and it is not evidence. Item~(v) is the sharpest version of the paper's whole
+argument, and it arrived late enough to be embarrassing: Lean elaborated the
+broken file anyway and \code{\#print axioms} still reported \code{[propext]},
+so every semantic check we owned passed a file that does not parse. It is also
+defect~(iii) returning in a case (iii)'s own regression test cannot see, because
+that test reads the gate list back and never looks at the scaffolding around
+it.}
 \label{tab:defects}
 \end{table}
 
