@@ -173,3 +173,44 @@ attribution in the nine-entry record chain.
 - `lean/certs/rand_n8_m8_d0.3_s11_optimal_8.lean` — first certificate paired
   with a checked refutation for the *same* instance
 - `scripts/merge_certification.py`
+
+---
+
+## 2026-09-14 (later) — defect 11, found by a compile, not by our tests
+
+11. **The Lean emitter produced a syntactically invalid namespace for any
+    instance whose name contains a dot.** `emit()` built the namespace as
+    `"Cert" + name.replace("_", "").capitalize()`, which leaves the '.' of a
+    density in place: `rand_n8_m8_d0.3_s11` became
+    `namespace CertRandn8m8d0.3s11`. Lean reads '.' as a namespace separator,
+    so it opened `CertRandn8m8d0`, failed on the remainder, and failed again on
+    the matching `end`.
+
+    **Why nothing caught it.** All 13 certificates compiled on 2026-09-10 were
+    cipher matrices (`aes_mixcolumns`, `anubis`, `clefia_m1`), whose names are
+    dot-free. Only random instances carry a density in the name, and until
+    2026-09-14 no random instance had ever been emitted as a certificate. The
+    existing semantic tests (`tests/test_lean_semantics.py`) and the shadow
+    evaluator both check what the file *means*, and the meaning was correct:
+    Lean elaborated the declarations anyway and `#print axioms` still reported
+    `cert` depending only on `[propext]` and `gate_count` depending on none.
+    A file can be semantically right and syntactically broken at the same time,
+    and we had no test for the second.
+
+    **This is defect (iii) recurring in a case its regression test did not
+    cover.** (iii) was line-wrapping inside `(a, b)` tuples, caught by a
+    round-trip parse of the *program*. That test reads the gate list back and
+    never looks at the surrounding Lean scaffolding, so a broken namespace
+    passes it.
+
+    *Fix:* `slp/verify/lean_cert._lean_namespace()` now keeps only alphanumeric
+    characters. Cipher namespaces are unchanged (`CertAesmixcolumns`,
+    `CertAnubis`, `CertClefiam1`), so the 13 existing certificates remain valid
+    and do not need recompiling. `tests/test_lean_syntax.py` adds 17 checks on
+    the emitted file as *syntax*: namespaces must be single Lean identifiers,
+    every `namespace` must be closed by a matching `end`, and every
+    `#print axioms` target must name a declaration the file defines. Verified
+    to fail (6 failures) against the pre-fix emitter.
+
+    *Credit:* found by Rohan running `lean` on the certificate, which is the
+    first time a certificate for a random instance had ever been compiled.

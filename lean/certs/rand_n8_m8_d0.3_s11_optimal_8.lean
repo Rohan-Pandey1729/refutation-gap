@@ -78,7 +78,7 @@ def valid (n : Nat) (targets : List Vec) (prog : List (Nat × Nat)) : Bool :=
 end SLP
 
 
-namespace CertRandn8m8d0.3s11
+namespace CertRandn8m8d03s11
 
 def n : Nat := 8
 
@@ -109,4 +109,4 @@ theorem cert : SLP.valid n targets prog = true := by decide
 #print axioms cert
 #print axioms gate_count
 
-end CertRandn8m8d0.3s11
+end CertRandn8m8d03s11

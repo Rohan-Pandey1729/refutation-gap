@@ -4,7 +4,7 @@
  "gates": 8,
  "layer1_ok": true,
  "layer2_z3_ok": true,
- "layer2_z3_seconds": 0.22006011009216309,
+ "layer2_z3_seconds": 0.0688161849975586,
  "lean_cert": "lean/certs/rand_n8_m8_d0.3_s11_optimal_8.lean",
  "program": [
   [

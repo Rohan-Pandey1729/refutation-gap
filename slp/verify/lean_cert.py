@@ -112,6 +112,22 @@ def _vec_literal(mask: int, n: int) -> str:
     return "[" + ", ".join("true" if (mask >> i) & 1 else "false" for i in range(n)) + "]"
 
 
+def _lean_namespace(name: str) -> str:
+    """A Lean 4 identifier for this instance's namespace.
+
+    Lean treats '.' as a namespace separator, so any character that is not
+    alphanumeric must go. Instance names carry densities ("rand_n8_m8_d0.3_s11"),
+    and an unsanitised '.' silently splits the namespace in two: the file still
+    elaborates, but it no longer parses as one unit and `end` fails to match.
+    Caught by a compile on 2026-09-14, not by our tests; see the regression test
+    in tests/test_lean_cert.py.
+    """
+    ident = "".join(ch for ch in name if ch.isalnum())
+    if not ident:
+        ident = "instance"
+    return "Cert" + ident[0].upper() + ident[1:]
+
+
 def emit(inst: SLPInstance, program: Sequence[tuple[int, int]], path,
          method: str = "unknown", run: str = "unrecorded",
          tactic: str = "decide") -> str:
@@ -122,7 +138,7 @@ def emit(inst: SLPInstance, program: Sequence[tuple[int, int]], path,
         name=inst.name, fingerprint=inst.fingerprint(), n=n, m=inst.n_outputs,
         gates=gates, method=method, run=run, file=str(path))]
 
-    body.append(f"namespace Cert{inst.name.replace('_', '').capitalize()}\n")
+    body.append(f"namespace {_lean_namespace(inst.name)}\n")
     body.append(f"def n : Nat := {n}\n")
 
     body.append("/-- The target matrix: one coefficient vector per output row. -/")
@@ -152,7 +168,7 @@ def emit(inst: SLPInstance, program: Sequence[tuple[int, int]], path,
     body.append("-- Trust base. An empty axiom list means the kernel checked everything.")
     body.append("#print axioms cert")
     body.append("#print axioms gate_count\n")
-    body.append(f"end Cert{inst.name.replace('_', '').capitalize()}")
+    body.append(f"end {_lean_namespace(inst.name)}")
 
     text = "\n".join(body)
     from pathlib import Path
