@@ -256,6 +256,41 @@ identity and a referee will read it as a consequence, not an observation.
 **Position it as an implementation detail, benchmark against LCB-BP
 (2025/1493), and never claim priority for reducing BP's distance computations.**
 
+
+## 6d. PRIOR ART FOR CERTIFIED OPTIMALITY — checked 2026-09-16
+
+**This section exists because the paper's central claim was too strong and had to
+be narrowed before posting.** The draft asserted that the lower-bound half of an
+optimality claim is "in current practice an unaudited assertion by a SAT solver."
+That is false as a general statement about combinatorial optimization in 2026.
+
+| # | Claim | Status | Source (publisher pages only; no aggregators) |
+|---|---|---|---|
+| 6d.1 | The idea of returning a witness so output can be checked without trusting the algorithm is already named and surveyed | **VERIFIED** | McConnell, Mehlhorn, Näher, Schweitzer, *Certifying algorithms*, Computer Science Review **5(2):119–161**, 2011, DOI 10.1016/j.cosrev.2010.09.009. Abstract verbatim: *"A certifying algorithm is an algorithm that produces, with each output, a certificate or witness (easy-to-verify proof) that the particular output has not been compromised by a bug."* Survey covers negative answers (non-bipartiteness via odd cycle) and optimality (odd-set cover certifying a maximum matching). |
+| 6d.2 | Certified optimality exists and is tooled for pseudo-Boolean optimization | **VERIFIED** | Koops, Le Berre, Myreen, Nordström, Oertel, Tan, Vinyals, *Practically Feasible Proof Logging for Pseudo-Boolean Optimization*, CP 2025, LIPIcs **340**, 21:1–21:27, DOI 10.4230/LIPIcs.CP.2025.21. Abstract: VeriPB + CakePB toolchain, *"formally verified"*, performance *"now quite close to the level of SAT solving, and hence is clearly practically feasible."* |
+| 6d.3 | Symmetry and dominance reasoning in optimization is certifiable | **VERIFIED** | Bogaerts, Gocht, McCreesh, Nordström, *Certified Dominance and Symmetry Breaking for Combinatorial Optimisation*, JAIR **77**:1539–1589, 2023, DOI 10.1613/jair.1.14296. |
+| 6d.4 | MIP has an independently checkable certificate format | **VERIFIED** | Cheung, Gleixner, Steffy, *Verifying Integer Programming Results*, IPCO 2017, LNCS **10328**:148–160, DOI 10.1007/978-3-319-59250-3_13. Abstract describes *"a list of statements that can be sequentially verified using a limited number of inference rules"* plus an independent checking tool. |
+| 6d.5 | Certified optimality is competition infrastructure, not an aspiration | **VERIFIED** | Pseudo-Boolean Competition 2026, https://www.cril.univ-artois.fr/PB26/ verbatim: *"PBS (PB Satisfaction) and PBO (PB Optimization) for linear constraints, with and without certificate of unsatisfiability/optimality"*; *"Certificates of unsatisfiability/optimality must be generated in the VeriPB format."* 100 GB proof cap, 5 h verification cap. Competition site, no publisher equivalent exists. |
+| 6d.6 | Any of this has been applied to circuit minimization, XOR-count, SLPs over GF(2), or cryptographic linear layers | **NONE FOUND** | VeriPB's own publication list (veripb.org/publications.html) enumerates subgraph solving, graph colouring, MaxSAT, planning, 0-1 ILP presolve and more; none touch circuit minimization. The SLP literature ships no proof logs. **This null result is what the paper's narrow claim rests on. Re-check before any future submission.** |
+| 6d.7 | Two "XOR"/"circuit" homonyms that must be cited and distinguished, not ignored | **VERIFIED** | Gocht & Nordström, *Certifying Parity Reasoning Efficiently Using Pseudo-Boolean Proofs*, AAAI **35(5)**:3768–3777, 2021 — XOR constraints *inside a solver*, not XOR circuits. McIlree, McCreesh, Nordström, *Proof Logging for the Circuit Constraint*, CPAIOR 2024, LNCS **14743**:38–55 — the CP global constraint for **Hamiltonian cycles** (*"e.g. for vehicle routing"*), not Boolean circuits. |
+
+**Framing rules that follow, and that the paper now obeys:**
+
+- ❌ **Not defensible:** "the lower bound is, in current practice, an unaudited
+  assertion by a SAT solver"; "we name the refutation gap" as though naming an
+  unnamed problem.
+- ✅ **Defensible:** certified optimality is mature and deployed; it has not
+  reached circuit minimization; no g-XOR lower bound for AES MixColumns has ever
+  been published; we produce the first certified optimality results for SLP
+  instances and measure the cost.
+- ⚠️ **Must be pre-empted:** "why not just use VeriPB?" The paper now answers it
+  in Related Work: our refutation is a single UNSAT query, so DRAT suffices;
+  VeriPB would be the right tool for certifying the *symmetry-breaking* argument
+  our encoding currently asserts, which is named as the next step.
+- ⚠️ **Precision:** most of the nine published counts claim only a smaller
+  circuit, not minimality. Do not accuse them of failing to certify a claim they
+  never made. The charge is against the state of the field.
+
 ## 7. Motivating context (Navier–Stokes, September 2026)
 
 Used only in the motivation section. Corrections to this project's earlier draft

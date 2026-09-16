@@ -214,3 +214,47 @@ attribution in the nine-entry record chain.
 
     *Credit:* found by Rohan running `lean` on the certificate, which is the
     first time a certificate for a random instance had ever been compiled.
+
+---
+
+## 2026-09-16 — defect 12, the largest one: the thesis sentence was false
+
+12. **"The lower bound is, in current practice, an unaudited assertion by a SAT
+    solver" was wrong**, and it was the sentence the paper was built on.
+    Certified optimality is a mature, deployed practice in combinatorial
+    optimization. Confirmed from publisher pages, not from an agent's summary:
+
+    - **Certifying algorithms** already names the principle and treats both the
+      negative case and the optimality case as first class (McConnell, Mehlhorn,
+      Näher, Schweitzer, Computer Science Review 5(2):119–161, 2011).
+    - **VeriPB + CakePB** give formally verified proof logging for pseudo-Boolean
+      *optimization* at overheads "quite close to the level of SAT solving"
+      (Koops et al., CP 2025, LIPIcs 340, 21:1–21:27).
+    - **The 2026 Pseudo-Boolean Competition** runs an optimization track with
+      certificates of optimality required in VeriPB format, 100 GB proof cap.
+    - **MIP** has had an independently checkable certificate format since
+      Cheung, Gleixner & Steffy (IPCO 2017).
+
+    **What survived.** A hard search found no application of proof logging or
+    certified optimality to circuit minimization, XOR-count, straight-line
+    programs over GF(2), or cryptographic linear layers. VeriPB's own publication
+    list covers many domains and none of them is this one. So the narrow claim
+    holds and the paper now makes only that one.
+
+    *Fix:* abstract, introduction, contribution 1 and Related Work all reframed.
+    The paper now states the prior art up front, cites the work that would
+    otherwise refute it, and answers the obvious objection ("why not just use
+    VeriPB?") explicitly: our refutation is a single UNSAT query so DRAT
+    suffices, while VeriPB is the right tool for certifying the symmetry-breaking
+    argument our encoding asserts, which is named as the next step. Two
+    homonyms are cited and distinguished so a reader does not think we missed
+    them. SOURCES.md section 6d records the whole check.
+
+    *How it was found:* asked for foundational prior art before posting, rather
+    than after. Every load-bearing source was then re-fetched from the publisher
+    by hand, because the finding was too consequential to take on an agent's
+    prose. This is the project's own rule applied to its own thesis, and the
+    thesis lost.
+
+    *What it cost to be wrong for four days:* nothing, because it was caught
+    before posting. That is the entire argument for doing this check first.
