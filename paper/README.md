@@ -1,7 +1,6 @@
 # VeriCodeGen 2026 submission
 
-**Title:** The Refutation Gap: Certifying Both Halves of an Optimality Claim in
-AI-Assisted Program Synthesis
+**Title:** The Refutation Gap: Certifying Both Halves of an Optimality Claim
 
 **Venue (confirmed 2026-09-11 from the CFP):** VeriCodeGen: AI for Verifiable
 Coding — NeurIPS 2026 workshop, Atlanta, **12 December 2026**.
